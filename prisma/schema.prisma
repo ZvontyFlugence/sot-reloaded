@@ -1,0 +1,343 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialIntegrity", "interactiveTransactions"]
+}
+
+datasource db {
+  provider             = "mysql"
+  url                  = env("DB_DEV_URL")
+  shadowDatabaseUrl    = env("SHADOW_DB_URL")
+  referentialIntegrity = "prisma"
+}
+
+model User {
+  id                Int             @id @default(autoincrement())
+  username          String          @db.VarChar(45)
+  email             String          @unique @db.VarChar(255)
+  password          String          @db.VarChar(255)
+  image             String
+  createdOn         DateTime        @default(now())
+  description       String?
+  level             Int             @default(1)
+  xp                Int             @default(0)
+  health            Int             @default(100)
+  country           Country         @relation(fields: [countryId], references: [id])
+  countryId         Int
+  gold              Decimal         @default(5.00)
+  strength          Int             @default(0)
+  militaryRank      Int             @default(0)
+  totalDmg          Int             @default(0)
+  patriotDmg        PatriotDamage[]
+  location          Region          @relation("UserLocation", fields: [locationId], references: [id])
+  locationId        Int
+  residence         Region          @relation("UserResidence", fields: [residenceId], references: [id])
+  residenceId       Int
+  job               JobRecord?      @relation(fields: [jobId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  jobId             Int             @default(-1)
+  party             Party?          @relation(fields: [partyId], references: [id])
+  partyId           Int             @default(-1)
+  unit              Unit?           @relation(fields: [unitId], references: [id])
+  unitId            Int             @default(-1)
+  newspaper         Newspaper?
+  newsId            Int             @default(-1)
+  companies         Company[]
+  canTrain          DateTime        @default(now())
+  canWork           DateTime        @default(now())
+  canCollectRewards DateTime        @default(now())
+  canHeal           DateTime        @default(now())
+  wallet            WalletBalance[]
+  inventory         InvItem[]
+  alerts            Alert[]
+  messages          MsgThread[]
+  pendingFriends    PendingFriend[]
+  friends           Friend[]
+  ipAddrs           IpAddr[]
+  banned            Boolean         @default(false)
+  superSoldier      Int             @default(0)
+}
+
+model PatriotDamage {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+model WalletBalance {
+  id         Int      @id @default(autoincrement())
+  owner      User     @relation(fields: [ownerId], references: [id])
+  ownerId    Int
+  currency   Currency @relation(fields: [currencyId], references: [id])
+  currencyId Int
+  amount     Decimal  @default(0.00)
+}
+
+model Currency {
+  id           Int                @id @default(autoincrement())
+  code         String             @unique @db.VarChar(3)
+  country      Country            @relation(fields: [countryId], references: [id])
+  countryId    Int                @unique
+  wallets      WalletBalance[]
+  funds        FundsBalance[]
+  treasuries   TreasuryBalanace[]
+  ProductOffer ProductOffer[]
+}
+
+model InvItem {
+  id       Int  @id @default(autoincrement())
+  user     User @relation(fields: [userId], references: [id])
+  userId   Int
+  item     Item @relation(fields: [itemId], references: [id])
+  itemId   Int
+  quantity Int
+}
+
+model Item {
+  id           Int            @id @default(autoincrement())
+  name         String         @db.VarChar(30)
+  image        String         @db.VarChar(255)
+  quality      Int            @default(0)
+  invItems     InvItem[]
+  storageItems StorageItem[]
+  prodOffers   ProductOffer[]
+}
+
+model Alert {
+  id        Int      @id @default(autoincrement())
+  read      Boolean  @default(false)
+  type      String   @db.VarChar(60)
+  message   String   @db.VarChar(255)
+  from      Int?
+  timestamp DateTime @default(now())
+  to        User     @relation(fields: [toId], references: [id])
+  toId      Int
+}
+
+model MsgThread {
+  id           Int      @id @default(autoincrement())
+  read         Boolean  @default(false)
+  subject      String   @db.VarChar(60)
+  participants User[]
+  messages     Msg[]
+  timestamp    DateTime @default(now())
+}
+
+model Msg {
+  id        Int       @id @default(autoincrement())
+  thread    MsgThread @relation(fields: [threadId], references: [id])
+  threadId  Int
+  from      Int
+  content   String    @db.VarChar(255)
+  timestamp DateTime  @default(now())
+}
+
+model PendingFriend {
+  id      Int  @id @default(autoincrement())
+  user    User @relation(fields: [userId], references: [id])
+  userId  Int
+  pending Int
+}
+
+model Friend {
+  id       Int  @id @default(autoincrement())
+  user     User @relation(fields: [userId], references: [id])
+  userId   Int
+  friendId Int
+}
+
+model IpAddr {
+  id     Int    @id @default(autoincrement())
+  user   User   @relation(fields: [userId], references: [id])
+  userId Int
+  ip     String
+}
+
+// TODO: Add Government, Treasury, Policies, and Laws
+model Country {
+  id          Int                @id @default(autoincrement())
+  name        String             @db.VarChar(60)
+  nick        String             @db.VarChar(30)
+  flagCode    String             @db.VarChar(3)
+  currency    Currency?
+  color       String             @db.VarChar(7)
+  capital     Int
+  gold        Decimal            @default(500.00)
+  treasury    TreasuryBalanace[]
+  citizens    User[]
+  parties     Party[]
+  regions     Region[]           @relation("CountryOwnedRegion")
+  coreRegions Region[]           @relation("CountryCoreRegion")
+}
+
+model TreasuryBalanace {
+  id           Int      @id @default(autoincrement())
+  country      Country  @relation(fields: [countryId], references: [id])
+  countryId    Int
+  currency     Currency @relation(fields: [currencyCode], references: [code])
+  currencyCode String   @unique @db.VarChar(3)
+  amount       Decimal  @default(10000.00)
+}
+
+model Region {
+  id        Int              @id @default(autoincrement())
+  name      String           @db.VarChar(60)
+  resource  Int
+  core      Country          @relation("CountryCoreRegion", fields: [coreId], references: [id])
+  coreId    Int
+  owner     Country          @relation("CountryOwnedRegion", fields: [ownerId], references: [id])
+  ownerId   Int
+  players   User[]           @relation("UserLocation")
+  residents User[]           @relation("UserResidence")
+  companies Company[]
+  borders   RegionGeom[]
+  neighbors RegionNeighbor[] @relation("RegionNeighborSrc")
+}
+
+model RegionGeom {
+  id       Int          @id @default(autoincrement())
+  region   Region       @relation(fields: [regionId], references: [id])
+  regionId Int
+  geom     RegionPath[]
+}
+
+model RegionPath {
+  id     Int        @id @default(autoincrement())
+  geom   RegionGeom @relation(fields: [geomId], references: [id])
+  geomId Int
+  lat    Float      @db.Double
+  lng    Float      @db.Double
+}
+
+model RegionNeighbor {
+  id         Int    @id @default(autoincrement())
+  region     Region @relation("RegionNeighborSrc", fields: [regionId], references: [id])
+  regionId   Int
+  neighborId Int
+}
+
+model Company {
+  id            Int            @id @default(autoincrement())
+  name          String         @db.VarChar(60)
+  image         String
+  type          Int
+  ceo           User           @relation(fields: [ceoId], references: [id])
+  ceoId         Int
+  location      Region         @relation(fields: [locationId], references: [id])
+  locationId    Int
+  gold          Decimal        @default(0.00)
+  funds         FundsBalance[]
+  inventory     StorageItem[]
+  employees     JobRecord[]
+  productOffers ProductOffer[]
+  jobOffers     JobOffer[]
+}
+
+model FundsBalance {
+  id         String   @id @default(cuid())
+  comp       Company  @relation(fields: [compId], references: [id])
+  compId     Int
+  currency   Currency @relation(fields: [currencyId], references: [code])
+  currencyId String   @unique @db.VarChar(3)
+  amount     Decimal  @default(0.00)
+}
+
+model StorageItem {
+  id       Int     @id @default(autoincrement())
+  comp     Company @relation(fields: [compId], references: [id])
+  compId   Int
+  item     Item    @relation(fields: [itemId], references: [id])
+  itemId   Int
+  quantity Int
+}
+
+model JobRecord {
+  id     Int     @id @default(autoincrement())
+  comp   Company @relation(fields: [compId], references: [id])
+  compId Int
+  userId Int
+  title  String  @db.VarChar(30)
+  wage   Decimal @default(1.00)
+  user   User[]
+}
+
+model ProductOffer {
+  id           Int      @id @default(autoincrement())
+  comp         Company  @relation(fields: [compId], references: [id])
+  compId       Int
+  item         Item     @relation(fields: [itemId], references: [id])
+  itemId       Int
+  quantity     Int
+  price        Decimal
+  currency     Currency @relation(fields: [currencyCode], references: [code])
+  currencyCode String   @unique @db.VarChar(3)
+}
+
+model JobOffer {
+  id       Int     @id @default(autoincrement())
+  workerId Int
+  comp     Company @relation(fields: [compId], references: [id])
+  compId   Int
+  title    String  @db.VarChar(30)
+  quantity Int     @default(1)
+  wage     Decimal @default(1.00)
+}
+
+model Party {
+  id                 Int                 @id @default(autoincrement())
+  name               String              @db.VarChar(60)
+  image              String              @db.VarChar(255)
+  econStance         Decimal             @default(0)
+  socStance          Decimal             @default(0)
+  president          Int
+  vp                 Int
+  members            User[]
+  description        String              @db.VarChar(255)
+  country            Country             @relation(fields: [countryId], references: [id])
+  countryId          Int
+  cpCandidates       CPCandidate[]
+  congressCandidates CongressCandidate[]
+  ppCandidates       PPCandidate[]
+  color              String              @db.VarChar(7)
+}
+
+model CPCandidate {
+  id          Int   @id @default(autoincrement())
+  candidateId Int
+  party       Party @relation(fields: [partyId], references: [id])
+  partyId     Int
+}
+
+model CongressCandidate {
+  id          Int   @id @default(autoincrement())
+  candidateId Int
+  party       Party @relation(fields: [partyId], references: [id])
+  partyId     Int
+}
+
+model PPCandidate {
+  id          Int   @id @default(autoincrement())
+  candidateId Int
+  party       Party @relation(fields: [partyId], references: [id])
+  partyId     Int
+}
+
+// TODO: Add Daily Order
+model Unit {
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(60)
+  image    String @db.Char(255)
+  co       Int
+  xo       Int
+  soldiers User[]
+}
+
+// TODO: Add fields for Articles
+model Newspaper {
+  id       Int    @id @default(autoincrement())
+  name     String @db.VarChar(60)
+  image    String @db.VarChar(255)
+  author   User   @relation(fields: [authorId], references: [id])
+  authorId Int    @unique
+}
