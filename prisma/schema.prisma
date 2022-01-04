@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["referentialIntegrity", "interactiveTransactions"]
@@ -26,7 +23,7 @@ model User {
   health            Int             @default(100)
   country           Country         @relation(fields: [countryId], references: [id])
   countryId         Int
-  gold              Decimal         @default(5.00)
+  gold              Decimal         @default(5.000000000000000000000000000000)
   strength          Int             @default(0)
   militaryRank      Int             @default(0)
   totalDmg          Int             @default(0)
@@ -35,7 +32,7 @@ model User {
   locationId        Int
   residence         Region          @relation("UserResidence", fields: [residenceId], references: [id])
   residenceId       Int
-  job               JobRecord?      @relation(fields: [jobId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  job               JobRecord?      @relation(fields: [jobId], references: [id], onDelete: NoAction)
   jobId             Int             @default(-1)
   party             Party?          @relation(fields: [partyId], references: [id])
   partyId           Int             @default(-1)
@@ -71,7 +68,7 @@ model WalletBalance {
   ownerId    Int
   currency   Currency @relation(fields: [currencyId], references: [id])
   currencyId Int
-  amount     Decimal  @default(0.00)
+  amount     Decimal  @default(0.000000000000000000000000000000)
 }
 
 model Currency {
@@ -154,7 +151,6 @@ model IpAddr {
   ip     String
 }
 
-// TODO: Add Government, Treasury, Policies, and Laws
 model Country {
   id          Int                @id @default(autoincrement())
   name        String             @db.VarChar(60)
@@ -163,7 +159,7 @@ model Country {
   currency    Currency?
   color       String             @db.VarChar(7)
   capital     Int
-  gold        Decimal            @default(500.00)
+  gold        Decimal            @default(500.000000000000000000000000000000)
   treasury    TreasuryBalanace[]
   citizens    User[]
   parties     Party[]
@@ -177,7 +173,7 @@ model TreasuryBalanace {
   countryId    Int
   currency     Currency @relation(fields: [currencyCode], references: [code])
   currencyCode String   @unique @db.VarChar(3)
-  amount       Decimal  @default(10000.00)
+  amount       Decimal  @default(10000.000000000000000000000000000000)
 }
 
 model Region {
@@ -206,8 +202,8 @@ model RegionPath {
   id     Int        @id @default(autoincrement())
   geom   RegionGeom @relation(fields: [geomId], references: [id])
   geomId Int
-  lat    Float      @db.Double
-  lng    Float      @db.Double
+  lat    Float
+  lng    Float
 }
 
 model RegionNeighbor {
@@ -226,7 +222,7 @@ model Company {
   ceoId         Int
   location      Region         @relation(fields: [locationId], references: [id])
   locationId    Int
-  gold          Decimal        @default(0.00)
+  gold          Decimal        @default(0.000000000000000000000000000000)
   funds         FundsBalance[]
   inventory     StorageItem[]
   employees     JobRecord[]
@@ -240,7 +236,7 @@ model FundsBalance {
   compId     Int
   currency   Currency @relation(fields: [currencyId], references: [code])
   currencyId String   @unique @db.VarChar(3)
-  amount     Decimal  @default(0.00)
+  amount     Decimal  @default(0.000000000000000000000000000000)
 }
 
 model StorageItem {
@@ -258,7 +254,7 @@ model JobRecord {
   compId Int
   userId Int
   title  String  @db.VarChar(30)
-  wage   Decimal @default(1.00)
+  wage   Decimal @default(1.000000000000000000000000000000)
   user   User[]
 }
 
@@ -281,15 +277,15 @@ model JobOffer {
   compId   Int
   title    String  @db.VarChar(30)
   quantity Int     @default(1)
-  wage     Decimal @default(1.00)
+  wage     Decimal @default(1.000000000000000000000000000000)
 }
 
 model Party {
   id                 Int                 @id @default(autoincrement())
   name               String              @db.VarChar(60)
   image              String              @db.VarChar(255)
-  econStance         Decimal             @default(0)
-  socStance          Decimal             @default(0)
+  econStance         Decimal             @default(0.000000000000000000000000000000)
+  socStance          Decimal             @default(0.000000000000000000000000000000)
   president          Int
   vp                 Int
   members            User[]
@@ -323,7 +319,6 @@ model PPCandidate {
   partyId     Int
 }
 
-// TODO: Add Daily Order
 model Unit {
   id       Int    @id @default(autoincrement())
   name     String @db.VarChar(60)
@@ -333,11 +328,19 @@ model Unit {
   soldiers User[]
 }
 
-// TODO: Add fields for Articles
 model Newspaper {
   id       Int    @id @default(autoincrement())
   name     String @db.VarChar(60)
   image    String @db.VarChar(255)
   author   User   @relation(fields: [authorId], references: [id])
   authorId Int    @unique
+}
+
+model MsgThreadToUser {
+  A Int
+  B Int
+
+  @@unique([A, B], map: "_MsgThreadToUser_AB_unique")
+  @@index([B], map: "_MsgThreadToUser_B_index")
+  @@map("_MsgThreadToUser")
 }
