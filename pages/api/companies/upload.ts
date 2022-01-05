@@ -20,29 +20,31 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			if (!session || !session.user.id) return res.status(403).json({ error: 'Unauthorized' })
 
 			const form = new formidable.IncomingForm()
-			return await form.parse(req, async (_err, _fields, files) => {
-				let result = await CloudinaryClient.uploader.upload((files.image as formidable.File)?.filepath, {
-					folder: 'profile'
+			return await form.parse(req, async (_err, fields, files) => {
+				let result = await CloudinaryClient.uploader.upload((files.image as formidable.File).filepath, {
+					folder: 'company'
 				})
 
 				if (result) {
 					let updated = await withPrisma(async (client: PrismaClient) => {
-						// Get Current User Image
-						let current = await client.user.findFirst({
-							where: { id: session.user.id },
+						const compId: number = Number.parseInt(fields['compId'] as string)
+						console.log('Fields', fields)
+						// Get Current Company Logo
+						let current = await client.company.findFirst({
+							where: { id: compId },
 							select: { image: true }
 						})
 
-						// Delete Previous User Image If Not Default Image
-						if (current && current.image !== process.env.DEFAULT_USER_IMG) {
+						// Delete Previous Company Logo If Not Default Image
+						if (current && current.image !== process.env.DEFAULT_IMG) {
 							await CloudinaryClient.uploader.destroy(
-								extractPublicId(current.image, CloudinaryFolder.PROFILE)
+								extractPublicId(current.image, CloudinaryFolder.COMPANY)
 							)
 						}
 
-						// Update User
-						return await client.user.update({
-							where: { id: session.user.id },
+						// Update Company
+						return await client.company.update({
+							where: { id: compId },
 							data: {
 								image: result?.secure_url
 							}

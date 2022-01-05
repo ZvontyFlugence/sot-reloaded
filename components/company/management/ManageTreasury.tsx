@@ -1,7 +1,9 @@
 import Select from '@/components/shared/Select'
 import { useUser } from '@/core/context/UserContext'
+import { IWalletInfo } from '@/core/interfaces'
 import request from '@/core/request'
 import convertDecimal from '@/core/uiHelpers/convertDecimal'
+import refreshData from '@/core/uiHelpers/refreshData'
 import showToast from '@/core/uiHelpers/showToast'
 import {
 	Button,
@@ -23,18 +25,20 @@ import {
 	useToast
 } from '@chakra-ui/react'
 import { FundsBalance, WalletBalance } from '@prisma/client'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 import { useSWRConfig } from 'swr'
 
 interface ManageTreasuryProps {
 	compId: number
 	funds: FundsBalance[]
-	wallet: WalletBalance[]
+	wallet: IWalletInfo[]
 	gold: number
 	currencyCode: string
 }
 
 const ManageTreasury: React.FC<ManageTreasuryProps> = ({ compId, currencyCode, funds, gold, wallet }) => {
+	const router = useRouter()
 	const toast = useToast()
 	const user = useUser()
 	const { mutate } = useSWRConfig()
@@ -49,12 +53,12 @@ const ManageTreasury: React.FC<ManageTreasuryProps> = ({ compId, currencyCode, f
 	const { isOpen: isWithdrawOpen, onOpen: onOpenWithdraw, onClose: onCloseWithdraw } = useDisclosure()
 
 	const handleDeposit = () => {
-		const userFunds = wallet.find(wi => wi.currencyId === currency)
+		const userFunds = wallet[currency]
 
 		const payload = {
 			compId,
 			gold: transGold > 0 ? transGold : undefined,
-			funds: currency > -1 && amount > 0 ? { currency: userFunds?.currencyId, amount } : undefined
+			funds: currency > -1 && amount > 0 ? { currency: userFunds?.currency.code, amount } : undefined
 		}
 
 		request({
@@ -65,6 +69,7 @@ const ManageTreasury: React.FC<ManageTreasuryProps> = ({ compId, currencyCode, f
 			if (data.success) {
 				showToast(toast, 'success', 'Deposit Successful', data?.message)
 				mutate('/api/me/wallet-info')
+				refreshData(router)
 			} else {
 				showToast(toast, 'error', 'Deposit Failed', data?.error)
 			}
@@ -91,6 +96,7 @@ const ManageTreasury: React.FC<ManageTreasuryProps> = ({ compId, currencyCode, f
 			if (data.success) {
 				showToast(toast, 'success', 'Withdrawal Successful', data?.message)
 				mutate('/api/me/wallet-info')
+				refreshData(router)
 			} else {
 				showToast(toast, 'error', 'Withdrawal Failed', data?.error)
 			}
@@ -125,7 +131,9 @@ const ManageTreasury: React.FC<ManageTreasuryProps> = ({ compId, currencyCode, f
 						<StatLabel>{currencyCode}</StatLabel>
 						<StatNumber>
 							<div className='flex items-center gap-2'>
-								<span>{(defaultFunds && convertDecimal(defaultFunds.amount).toFixed(2)) || 0.0}</span>
+								<span>
+									{(defaultFunds && convertDecimal(defaultFunds.amount).toFixed(2)) || (0).toFixed(2)}
+								</span>
 								<span className='sot-flag-wrap'>
 									<i className={`sot-flag sot-flag-usa h-10`} />
 								</span>
@@ -145,11 +153,11 @@ const ManageTreasury: React.FC<ManageTreasuryProps> = ({ compId, currencyCode, f
 						{currency > -1 && amount > 0 && transGold > 0 ? (
 							<p>
 								Deposit {transGold.toFixed(2)} Gold and {amount.toFixed(2)}{' '}
-								{funds[currency]?.currencyId}?
+								{wallet[currency]?.currency.code}?
 							</p>
 						) : currency > -1 && amount > 0 ? (
 							<p>
-								Deposit {amount.toFixed(2)} {currency}?
+								Deposit {amount.toFixed(2)} {wallet[currency]?.currency.code}?
 							</p>
 						) : (
 							transGold > 0 && <p>Deposit {transGold.toFixed(2)} Gold?</p>
@@ -172,11 +180,11 @@ const ManageTreasury: React.FC<ManageTreasuryProps> = ({ compId, currencyCode, f
 								selected={currency}
 								onChange={val => setCurrency(val)}
 							>
-								{([null] as (FundsBalance | null)[])
-									.concat(funds)
-									.map((cc: FundsBalance | null, i: number) => (
+								{([null] as (IWalletInfo | null)[])
+									.concat(wallet)
+									.map((cc: IWalletInfo | null, i: number) => (
 										<Select.Option key={i} value={i - 1} disabled={!cc}>
-											{cc ? cc.currencyId : 'Select Currency'}
+											{cc ? cc.currency.code : 'Select Currency'}
 										</Select.Option>
 									))}
 							</Select>
@@ -187,7 +195,7 @@ const ManageTreasury: React.FC<ManageTreasuryProps> = ({ compId, currencyCode, f
 								<Input
 									type='number'
 									min={0}
-									max={convertDecimal(funds[currency]?.amount)}
+									max={wallet[currency]?.amount ?? 0}
 									step={0.01}
 									value={amount.toFixed(2)}
 									onChange={e => setAmount(e.target.valueAsNumber)}
