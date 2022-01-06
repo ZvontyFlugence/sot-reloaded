@@ -43,28 +43,20 @@ const CompanyManagement: React.FC<CompManagementProps> = ({ company, currency })
 				<div className='bg-night-400 text-white mt-4 rounded shadow-md'>
 					<TabPanels>
 						<TabPanel>
-							<ManageProductOffers productOffers={company.productOffers ?? []} companyId={company.id} />
-						</TabPanel>
-						<TabPanel>
-							<ManageJobOffers
-								jobOffers={company.jobOffers ?? []}
-								companyId={company.id}
-								currency={currency}
-							/>
-						</TabPanel>
-						<TabPanel>
-							<ManageEmployees
-								employees={company.employees ?? []}
-								compId={company.id}
-								currency={currency}
-							/>
-						</TabPanel>
-						<TabPanel>
-							<ManageInventory
+							<ManageProductOffers
+								productOffers={company.productOffers ?? []}
 								inventory={company.inventory ?? []}
-								compId={company.id}
-								currency={currency}
+								companyId={company.id}
 							/>
+						</TabPanel>
+						<TabPanel>
+							<ManageJobOffers jobOffers={company.jobOffers ?? []} companyId={company.id} currency={currency} />
+						</TabPanel>
+						<TabPanel>
+							<ManageEmployees employees={company.employees ?? []} compId={company.id} currency={currency} />
+						</TabPanel>
+						<TabPanel>
+							<ManageInventory inventory={company.inventory ?? []} compId={company.id} currency={currency} />
 						</TabPanel>
 						<TabPanel>
 							<ManageTreasury

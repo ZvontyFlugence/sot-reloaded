@@ -3,6 +3,7 @@ import Select from '@/components/shared/Select'
 import { ITEMS } from '@/core/constants'
 import { GenericItem } from '@/core/interfaces'
 import request from '@/core/request'
+import refreshData from '@/core/uiHelpers/refreshData'
 import showToast from '@/core/uiHelpers/showToast'
 import {
 	Button,
@@ -20,6 +21,7 @@ import {
 	useToast,
 } from '@chakra-ui/react'
 import { StorageItem } from '@prisma/client'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
 
@@ -41,6 +43,7 @@ interface BasicCountry {
 const countryFetcher = (url: string) => request({ url, method: 'GET' })
 
 const ManageInventory: React.FC<ManageInventoryProps> = ({ compId, currency, inventory }) => {
+	const router = useRouter()
 	const toast = useToast()
 
 	const [selected, setSelected] = useState<StorageItem | null>(null)
@@ -71,6 +74,7 @@ const ManageInventory: React.FC<ManageInventoryProps> = ({ compId, currency, inv
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'succes', 'Product Offer Created', data?.message)
+				refreshData(router)
 				onClose()
 			} else {
 				showToast(toast, 'error', 'Create Product Offer Failed', data?.error)

@@ -1,6 +1,7 @@
 import { CompanyActions } from '@/core/enums'
 import { IJobRecord } from '@/core/interfaces'
 import request from '@/core/request'
+import refreshData from '@/core/uiHelpers/refreshData'
 import showToast from '@/core/uiHelpers/showToast'
 import {
 	Avatar,
@@ -90,6 +91,7 @@ const ManageEmployees: React.FC<ManageEmployeesProps> = ({ compId, currency, emp
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'success', 'Employee Updated', data?.message)
+				refreshData(router)
 				handleClose()
 			} else {
 				showToast(toast, 'error', 'Edit Employee Failed', data?.error)
@@ -107,6 +109,7 @@ const ManageEmployees: React.FC<ManageEmployeesProps> = ({ compId, currency, emp
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'success', 'Employee Fired', data?.message)
+				refreshData(router)
 				handleClose()
 			} else {
 				showToast(toast, 'error', 'Fire Employee Failed', data?.error)

@@ -1,4 +1,5 @@
 import request from '@/core/request'
+import refreshData from '@/core/uiHelpers/refreshData'
 import showToast from '@/core/uiHelpers/showToast'
 import {
 	Button,
@@ -24,6 +25,7 @@ import {
 	useToast,
 } from '@chakra-ui/react'
 import { JobOffer } from '@prisma/client'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
 interface ManageJobOffersProps {
@@ -33,6 +35,7 @@ interface ManageJobOffersProps {
 }
 
 const ManageJobOffers: React.FC<ManageJobOffersProps> = ({ companyId, jobOffers, currency }) => {
+	const router = useRouter()
 	const toast = useToast()
 
 	const [selected, setSelected] = useState<number>(-1)
@@ -61,6 +64,7 @@ const ManageJobOffers: React.FC<ManageJobOffersProps> = ({ companyId, jobOffers,
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'success', 'Job Offer Created', data?.message)
+				refreshData(router)
 				onCloseCreate()
 			} else {
 				showToast(toast, 'error', 'Create Job Offer Failed', data?.error)
@@ -78,6 +82,7 @@ const ManageJobOffers: React.FC<ManageJobOffersProps> = ({ companyId, jobOffers,
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'success', 'Job Offer Edited', data?.message)
+				refreshData(router)
 				handleClose('edit')
 			} else {
 				showToast(toast, 'error', 'Edit Job Offer Failed', data?.error)
@@ -95,6 +100,7 @@ const ManageJobOffers: React.FC<ManageJobOffersProps> = ({ companyId, jobOffers,
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'success', 'Job Offer Deleted', data?.message)
+				refreshData(router)
 				handleClose('delete')
 			} else {
 				showToast(toast, 'error', 'Delete Job Offer Failed', data?.error)

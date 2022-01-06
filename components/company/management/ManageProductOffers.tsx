@@ -1,5 +1,6 @@
 import { ITEMS } from '@/core/constants'
 import request from '@/core/request'
+import refreshData from '@/core/uiHelpers/refreshData'
 import showToast from '@/core/uiHelpers/showToast'
 import {
 	Button,
@@ -23,6 +24,7 @@ import {
 	useToast,
 } from '@chakra-ui/react'
 import { ProductOffer, StorageItem } from '@prisma/client'
+import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 
 interface ManageProductOffersProps {
@@ -32,6 +34,7 @@ interface ManageProductOffersProps {
 }
 
 const ManageProductOffers: React.FC<ManageProductOffersProps> = ({ companyId, inventory, productOffers }) => {
+	const router = useRouter()
 	const toast = useToast()
 
 	const [selected, setSelected] = useState<number>(-1)
@@ -73,6 +76,7 @@ const ManageProductOffers: React.FC<ManageProductOffersProps> = ({ companyId, in
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'success', 'Product Offer Updated', data?.message)
+				refreshData(router)
 				handleClose('edit')
 			} else {
 				showToast(toast, 'error', 'Edit Product Offer Failed', data?.error)
@@ -90,6 +94,7 @@ const ManageProductOffers: React.FC<ManageProductOffersProps> = ({ companyId, in
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'success', 'Product Offer Delete', data?.message)
+				refreshData(router)
 				handleClose('delete')
 			} else {
 				showToast(toast, 'error', 'Delete Product Offer Failed', data?.error)
