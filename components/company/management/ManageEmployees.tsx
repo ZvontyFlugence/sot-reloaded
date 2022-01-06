@@ -1,3 +1,4 @@
+import { CompanyActions } from '@/core/enums'
 import { IJobRecord } from '@/core/interfaces'
 import request from '@/core/request'
 import showToast from '@/core/uiHelpers/showToast'
@@ -73,14 +74,17 @@ const ManageEmployees: React.FC<ManageEmployeesProps> = ({ compId, currency, emp
 		if (!selected) return
 
 		request({
-			url: '/api/companies/employees/edit',
+			url: '/api/companies/doAction',
 			method: 'POST',
 			body: {
-				compId,
-				employee: {
-					userId: selected.userId,
-					title: title !== selected.title && title !== '' ? title : undefined,
-					wage: wage > 0 && wage !== Number.parseFloat(selected.wage) ? wage : undefined,
+				action: CompanyActions.EDIT_EMPLOYEE,
+				data: {
+					compId,
+					employee: {
+						userId: selected.userId,
+						title: title !== selected.title && title !== '' ? title : undefined,
+						wage: wage > 0 && wage !== Number.parseFloat(selected.wage) ? wage : undefined,
+					},
 				},
 			},
 		}).then((data) => {
@@ -97,9 +101,9 @@ const ManageEmployees: React.FC<ManageEmployeesProps> = ({ compId, currency, emp
 		if (!selected) return
 
 		request({
-			url: '/api/companies/employees/fire',
+			url: '/api/companies/doAction',
 			method: 'DELETE',
-			body: { compId, employeeId: selected.id },
+			body: { action: CompanyActions.FIRE_EMPLOYEE, data: { compId, employeeId: selected.id } },
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'success', 'Employee Fired', data?.message)

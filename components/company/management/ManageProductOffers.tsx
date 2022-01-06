@@ -22,15 +22,16 @@ import {
 	useDisclosure,
 	useToast,
 } from '@chakra-ui/react'
-import { ProductOffer } from '@prisma/client'
+import { ProductOffer, StorageItem } from '@prisma/client'
 import { useEffect, useState } from 'react'
 
 interface ManageProductOffersProps {
 	companyId: number
 	productOffers: ProductOffer[]
+	inventory: StorageItem[]
 }
 
-const ManageProductOffers: React.FC<ManageProductOffersProps> = ({ companyId, productOffers }) => {
+const ManageProductOffers: React.FC<ManageProductOffersProps> = ({ companyId, inventory, productOffers }) => {
 	const toast = useToast()
 
 	const [selected, setSelected] = useState<number>(-1)
@@ -55,11 +56,20 @@ const ManageProductOffers: React.FC<ManageProductOffersProps> = ({ companyId, pr
 	}, [selected])
 
 	const editProductOffer = () => {
-		const id = productOffers[selected].id
+		const offer = productOffers[selected]
 		request({
 			url: '/api/market/goods/edit',
 			method: 'POST',
-			body: { offer: { id, itemId: productId, quantity, price }, compId: companyId },
+			body: {
+				offer: {
+					id: offer.id,
+					itemId: productId,
+					quantity,
+					price,
+					diff: offer.quantity - quantity,
+				},
+				compId: companyId,
+			},
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'success', 'Product Offer Updated', data?.message)
@@ -75,7 +85,7 @@ const ManageProductOffers: React.FC<ManageProductOffersProps> = ({ companyId, pr
 
 		request({
 			url: '/api/market/goods/delete',
-			method: 'POST',
+			method: 'DELETE',
 			body: { compId: companyId, offerId: id },
 		}).then((data) => {
 			if (data.success) {
@@ -225,6 +235,11 @@ const ManageProductOffers: React.FC<ManageProductOffersProps> = ({ companyId, pr
 							<Input
 								type='number'
 								defaultValue={productOffers[selected]?.quantity ?? 0}
+								min={0}
+								max={
+									(inventory.find((si) => si.itemId === productId)?.quantity ?? 0) +
+									(productOffers[selected]?.quantity ?? 0)
+								}
 								onChange={(e) => setQuantity(e.target.valueAsNumber)}
 							/>
 						</FormControl>

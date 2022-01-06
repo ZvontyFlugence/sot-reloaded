@@ -1,4 +1,5 @@
 import Inventory from '@/components/shared/Inventory'
+import Select from '@/components/shared/Select'
 import { ITEMS } from '@/core/constants'
 import { GenericItem } from '@/core/interfaces'
 import request from '@/core/request'
@@ -19,7 +20,8 @@ import {
 	useToast,
 } from '@chakra-ui/react'
 import { StorageItem } from '@prisma/client'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import useSWR from 'swr'
 
 interface ManageInventoryProps {
 	compId: number
@@ -27,20 +29,45 @@ interface ManageInventoryProps {
 	currency: string
 }
 
+interface BasicCountry {
+	id: number
+	name: string
+	flagCode: string
+	currency: {
+		code: string
+	}
+}
+
+const countryFetcher = (url: string) => request({ url, method: 'GET' })
+
 const ManageInventory: React.FC<ManageInventoryProps> = ({ compId, currency, inventory }) => {
 	const toast = useToast()
 
 	const [selected, setSelected] = useState<StorageItem | null>(null)
 	const [quantity, setQuantity] = useState<number>(1)
 	const [price, setPrice] = useState<number>(0.01)
+	const [country, setCountry] = useState<number>(-1)
+	const [countries, setCountries] = useState<BasicCountry[]>([])
 
+	const { data: countryData } = useSWR('/api/countries', countryFetcher)
 	const { isOpen, onOpen, onClose } = useDisclosure()
 
+	useEffect(() => {
+		if (countryData?.countries) setCountries(countryData.countries as BasicCountry[])
+	}, [countryData])
+
 	const createProductOffer = () => {
+		const currency = countries.find((c) => c.id === country)?.currency
+		if (!currency) return
+
 		request({
-			url: '/api/market/goods/create',
+			url: '/api/markets/goods/create',
 			method: 'POST',
-			body: { compId, offer: { itemId: selected?.itemId, quantity, price } },
+			body: {
+				compId,
+				countryMarket: country,
+				offer: { itemId: selected?.itemId, quantity, price, currency },
+			},
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'succes', 'Product Offer Created', data?.message)
@@ -55,6 +82,7 @@ const ManageInventory: React.FC<ManageInventoryProps> = ({ compId, currency, inv
 		setSelected(null)
 		setQuantity(1)
 		setPrice(0.01)
+		setCountry(-1)
 		onClose()
 	}
 
@@ -94,6 +122,30 @@ const ManageInventory: React.FC<ManageInventoryProps> = ({ compId, currency, inv
 										max={Math.max(selected.quantity, 1)}
 										onChange={(e) => setQuantity(e.target.valueAsNumber)}
 									/>
+								</FormControl>
+								<FormControl>
+									<FormLabel>Country</FormLabel>
+									<Select
+										className='relative border border-white border-opacity-25 rounded shadow-md'
+										selected={country}
+										onChange={(val) => setCountry(val)}
+									>
+										{([null] as (BasicCountry | null)[]).concat(countries).map((c: BasicCountry | null, i: number) => (
+											<Select.Option key={i} value={c ? c.id : -1} disabled={!c}>
+												{c ? (
+													<span>
+														{c.name} ({c.currency.code}
+														<span className='ml-2 sot-flag-wrap'>
+															<i className={`sot-flag sot-flag-${c.flagCode} h-7`} />
+														</span>
+														)
+													</span>
+												) : (
+													'Select Country Market'
+												)}
+											</Select.Option>
+										))}
+									</Select>
 								</FormControl>
 								<FormControl>
 									<FormLabel>Price Per Unit</FormLabel>

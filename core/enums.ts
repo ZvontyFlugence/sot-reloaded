@@ -11,22 +11,24 @@ export const UserActions = {
 	SEND_MSG: 'send_msg',
 	TRAIN: 'train',
 	TRAVEL: 'travel',
-	WORK: 'work'
+	WORK: 'work',
 }
 
 export const CompanyActions = {
+	EDIT_EMPLOYEE: 'edit_employee',
+	FIRE_EMPLOYEE: 'fire_employee',
 	REBRAND: 'rebrand',
-	RELOCATE: 'relocate'
+	RELOCATE: 'relocate',
 }
 
 export const AlertTypes = {
 	DONATION: 'donation',
 	LEVEL_UP: 'level_up',
 	SEND_FR: 'send_fr',
-	SUPER_SOLDIER: 'super_soldier'
+	SUPER_SOLDIER: 'super_soldier',
 }
 
 export enum CloudinaryFolder {
 	COMPANY = 'company',
-	PROFILE = 'profile'
+	PROFILE = 'profile',
 }

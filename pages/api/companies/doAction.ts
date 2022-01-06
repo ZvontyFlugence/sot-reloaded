@@ -18,6 +18,12 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			const { action, data } = JSON.parse(req.body) as ReqBody
 
 			switch (action) {
+				case CompanyActions.EDIT_EMPLOYEE: {
+					let result = await edit_employee(data as EditEmpReqBody)
+				}
+				case CompanyActions.FIRE_EMPLOYEE: {
+					let result = await fire_employee(data as FireEmpReqBody)
+				}
 				case CompanyActions.REBRAND: {
 					let result = await rebrand(data as RebrandReqBody)
 					return res.status(result.status).json(result.body)
@@ -35,6 +41,14 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 	}
 }
 
+interface EditEmpReqBody {}
+
+async function edit_employee(data: EditEmpReqBody) {}
+
+interface FireEmpReqBody {}
+
+async function fire_employee(data: FireEmpReqBody) {}
+
 interface RebrandReqBody {
 	compId: number
 	name: string
@@ -45,8 +59,8 @@ async function rebrand(data: RebrandReqBody) {
 		return await client.company.update({
 			where: { id: data.compId },
 			data: {
-				name: data.name
-			}
+				name: data.name,
+			},
 		})
 	})
 
@@ -64,8 +78,8 @@ async function relocate(data: RelocateReqBody) {
 		return await client.company.update({
 			where: { id: data.compId },
 			data: {
-				locationId: data.regionId
-			}
+				locationId: data.regionId,
+			},
 		})
 	})
 
