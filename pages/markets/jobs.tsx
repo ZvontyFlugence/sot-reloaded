@@ -51,7 +51,7 @@ const JobMarket: NextPage<JobMarketProps> = ({ countries, defaultCountryId }) =>
 
 	const applyForJob = (compId: number, jobId: number) => {
 		request({
-			url: '/api/markets/job/apply',
+			url: '/api/markets/jobs/apply',
 			method: 'POST',
 			body: { compId, jobId },
 		}).then((data) => {
