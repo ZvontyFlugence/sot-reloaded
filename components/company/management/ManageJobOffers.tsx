@@ -55,9 +55,9 @@ const ManageJobOffers: React.FC<ManageJobOffersProps> = ({ companyId, jobOffers,
 
 	const createJobOffer = () => {
 		request({
-			url: '/api/market/job/create',
+			url: '/api/markets/jobs/create',
 			method: 'POST',
-			body: { compId: companyId, title, quantity, wage },
+			body: { compId: companyId, offer: { title, quantity, wage } },
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'success', 'Job Offer Created', data?.message)
@@ -72,9 +72,9 @@ const ManageJobOffers: React.FC<ManageJobOffersProps> = ({ companyId, jobOffers,
 		const id = jobOffers[selected].id
 
 		request({
-			url: '/api/market/job/edit',
+			url: '/api/markets/jobs/edit',
 			method: 'POST',
-			body: { offer: { id, title, quantity, wage } },
+			body: { compId: companyId, offer: { id, title, quantity, wage } },
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'success', 'Job Offer Edited', data?.message)
@@ -89,9 +89,9 @@ const ManageJobOffers: React.FC<ManageJobOffersProps> = ({ companyId, jobOffers,
 		const id = jobOffers[selected].id
 
 		request({
-			url: '/api/market/job/delete',
-			method: 'POST',
-			body: { jobId: id },
+			url: '/api/markets/jobs/delete',
+			method: 'DELETE',
+			body: { compId: companyId, offerId: id },
 		}).then((data) => {
 			if (data.success) {
 				showToast(toast, 'success', 'Job Offer Deleted', data?.message)

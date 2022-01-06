@@ -32,7 +32,7 @@ model User {
   locationId        Int
   residence         Region          @relation("UserResidence", fields: [residenceId], references: [id])
   residenceId       Int
-  job               JobRecord?      @relation(fields: [jobId], references: [id], onDelete: NoAction)
+  job               JobRecord?      @relation(fields: [jobId], references: [id])
   jobId             Int             @default(-1)
   party             Party?          @relation(fields: [partyId], references: [id])
   partyId           Int             @default(-1)
@@ -218,7 +218,7 @@ model Company {
   name          String         @db.VarChar(60)
   image         String
   type          Int
-  ceo           User           @relation(fields: [ceoId], references: [id])
+  ceo           User           @relation(fields: [ceoId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   ceoId         Int
   location      Region         @relation(fields: [locationId], references: [id])
   locationId    Int
@@ -272,7 +272,6 @@ model ProductOffer {
 
 model JobOffer {
   id       Int     @id @default(autoincrement())
-  workerId Int
   comp     Company @relation(fields: [compId], references: [id])
   compId   Int
   title    String  @db.VarChar(30)
