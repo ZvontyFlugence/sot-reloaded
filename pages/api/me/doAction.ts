@@ -22,8 +22,16 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 				const { action, data } = JSON.parse(req.body)
 
 				switch (action) {
+					case UserActions.ACCEPT_FR: {
+						let result = await accept_friend(session.user.id, data)
+						return res.status(result.status).json(result.body)
+					}
 					case UserActions.COLLECT_REWARDS: {
 						let result = await collect_rewards(session.user.id)
+						return res.status(result.status).json(result.body)
+					}
+					case UserActions.DECLINE_FR: {
+						let result = await decline_friend(session.user.id, data)
 						return res.status(result.status).json(result.body)
 					}
 					case UserActions.DONATE: {
@@ -42,6 +50,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 						let result = await move_residence(session.user.id, data)
 						return res.status(result.status).json(result.body)
 					}
+					case UserActions.REMOVE_FR: {
+						let result = await remove_friend(session.user.id, data)
+						return res.status(result.status).json(result.body)
+					}
 					case UserActions.SEND_FR: {
 						let result = await send_fr(session.user.id, data)
 						return res.status(result.status).json(result.body)
@@ -54,6 +66,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 						let result = await travel(session.user.id, data)
 						return res.status(result.status).json(result.body)
 					}
+					case UserActions.WORK: {
+						let result = await work(session.user.id)
+						return res.status(result.status).json(result.body)
+					}
 					default:
 						return res.status(400).json({ error: 'Unknown User Action' })
 				}
@@ -63,6 +79,61 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 		}
 	} catch (e: any) {
 		console.error(e?.message)
+	}
+}
+
+async function accept_friend(userId: number, data: { alertId: number }) {
+	try {
+		let result = await withPrisma(async (client: PrismaClient) => {
+			return await client.$transaction(async (prisma) => {
+				// Delete the Alert
+				const alert = await prisma.alert.delete({
+					where: { id: data.alertId },
+				})
+
+				if (!alert) throw new Error('Friend Request Not Found')
+				else if (!alert.from) throw new Error('Friend ID Not Provided')
+
+				// Add New Friend to User's Friend List
+				const user = await prisma.user.update({
+					where: { id: userId },
+					data: {
+						friends: {
+							create: { friendId: alert.from },
+						},
+					},
+				})
+
+				// Find Id Of Pending Friend Request
+				const pending = await prisma.pendingFriend.findFirst({
+					where: {
+						userId: alert.from,
+						pending: userId,
+					},
+					select: { id: true },
+				})
+
+				if (!pending) throw new Error('Pending Friend Request Not Found')
+
+				// Delete Pending Request
+				const friend = await prisma.user.update({
+					where: { id: alert.from },
+					data: {
+						pendingFriends: {
+							delete: { id: pending.id },
+						},
+					},
+				})
+
+				return [alert, user, friend]
+			})
+		})
+
+		if (result) return { status: 200, body: { success: true } }
+		return { status: 500, body: { success: false, error: 'Something Went Wrong' } }
+	} catch (e: any) {
+		console.error(e?.message)
+		return { status: 400, body: { success: false, error: e?.message } }
 	}
 }
 
@@ -114,6 +185,44 @@ async function collect_rewards(userId: number) {
 		}
 	} catch (e: any) {
 		// Transaction Failed
+		console.error(e?.message)
+		return { status: 400, body: { success: false, error: e?.message } }
+	}
+}
+
+async function decline_friend(userId: number, data: { alertId: number }) {
+	try {
+		let result = await withPrisma(async (client: PrismaClient) => {
+			return await client.$transaction(async (prisma) => {
+				// Delete Alert
+				const alert = await prisma.alert.delete({ where: { id: data.alertId } })
+
+				if (!alert) throw new Error('Friend Request Not Found')
+				else if (!alert.from) throw new Error('Friend ID Not Provided')
+
+				// Find Pending Friend Request ID
+				const pending = await prisma.pendingFriend.findFirst({
+					where: {
+						userId: alert.from,
+						pending: userId,
+					},
+					select: { id: true },
+				})
+
+				if (!pending) throw new Error('Pending Friend Request Not Found')
+
+				// Delete Pending Friend Request
+				const notFriend = await prisma.pendingFriend.delete({
+					where: { id: pending.id },
+				})
+
+				return [alert, notFriend]
+			})
+		})
+
+		if (result) return { status: 200, body: { success: true } }
+		return { status: 500, body: { success: false, error: 'Something went wrong' } }
+	} catch (e: any) {
 		console.error(e?.message)
 		return { status: 400, body: { success: false, error: e?.message } }
 	}
@@ -361,6 +470,24 @@ async function move_residence(userId: number, data: { regionId: number }) {
 	return { status: 500, body: { success: false, error: 'Something Went Wrong' } }
 }
 
+async function remove_friend(userId: number, data: { friendId: number }) {
+	let updated = await withPrisma(async (client: PrismaClient) => {
+		return await client.user.update({
+			where: { id: userId },
+			data: {
+				friends: {
+					delete: {
+						id: data.friendId,
+					},
+				},
+			},
+		})
+	})
+
+	if (updated) return { status: 200, body: { success: true } }
+	return { status: 500, body: { success: false, error: 'Something Went Wrong' } }
+}
+
 interface SendFriendReqBody {
 	profileId: number
 }
@@ -506,4 +633,111 @@ async function travel(userId: number, data: { regionId: number }) {
 	if (updated) return { status: 200, body: { success: true } }
 
 	return { status: 500, body: { success: false, error: 'Something Went Wrong' } }
+}
+
+async function work(userId: number) {
+	try {
+		let updated = await withPrisma(async (client: PrismaClient) => {
+			return await client.$transaction(async (prisma) => {
+				// Get JobRecord
+				let job = await prisma.jobRecord.findFirst({
+					where: {
+						userId: userId,
+					},
+					include: {
+						comp: {
+							select: {
+								location: {
+									select: {
+										owner: {
+											select: {
+												currency: {
+													select: {
+														id: true,
+														code: true,
+													},
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				})
+
+				if (!job) throw new Error('Job Not Found')
+
+				if (!job.comp.location.owner.currency?.code) throw new Error('Insufficient Currency')
+
+				// Check if there is existing Funds Balance for Currency
+				let compFunds = await prisma.fundsBalance.findFirst({
+					where: {
+						compId: job.compId,
+						currencyId: job.comp.location.owner.currency.code,
+					},
+					select: {
+						id: true,
+						amount: true,
+						currencyId: true,
+					},
+				})
+
+				if (!compFunds || compFunds.amount < job.wage) throw new Error('Insufficient Currency')
+
+				// Subtract Wage from Company
+				let comp = await prisma.company.update({
+					where: { id: job.compId },
+					data: {
+						funds: {
+							update: {
+								where: { id: compFunds.id },
+								data: { amount: { decrement: job.wage } },
+							},
+						},
+					},
+				})
+
+				// Check if there is existing User Balance for currency
+				let userWallet = await prisma.walletBalance.findFirst({
+					where: {
+						ownerId: userId,
+						currencyId: job.comp.location.owner.currency.id,
+					},
+					select: {
+						id: true,
+					},
+				})
+
+				// Add funds to User Balance for Currency
+				let user = await prisma.user.update({
+					where: { id: userId },
+					data: {
+						wallet: {
+							upsert: {
+								create: {
+									currency: {
+										connect: { code: compFunds.currencyId },
+									},
+									amount: job.wage,
+								},
+								update: {
+									amount: { increment: job.wage },
+								},
+								where: { id: userWallet?.id ?? -1 },
+							},
+						},
+					},
+				})
+
+				return [comp, user]
+			})
+		})
+
+		if (updated) return { status: 200, body: { success: true } }
+		return { status: 500, body: { success: false, error: 'Something Went Wrong' } }
+	} catch (e: any) {
+		console.error(e?.message)
+		return { status: 400, body: { success: false, error: e?.message } }
+	}
 }
