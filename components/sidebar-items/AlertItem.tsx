@@ -27,24 +27,25 @@ const AlertItem: React.FC<AlertItemProps> = ({ alert, mutate }) => {
 		switch (alert.type) {
 			case AlertTypes.SEND_FR: {
 				return (
-					<div className='flex w-full'>
-						<div className='flex justify-end gap-4 w-full'>
+					<div className='flex flex-1 w-full'>
+						<div className='flex justify-end gap-2 w-full'>
 							<IconButton
 								as={IoCheckmarkOutline}
-								size='sm'
+								size='xs'
 								variant='solid'
 								colorScheme=''
-								bgColor='aurora.green.200'
+								bgColor='aurora.green'
 								color='snow.100'
 								onClick={acceptFR}
 								aria-label='Accept Friend Request Button'
 							/>
 							<IconButton
 								as={IoCloseOutline}
-								size='sm'
+								size='xs'
 								variant='solid'
 								colorScheme=''
-								bgColor='aurora.red.500'
+								bgColor='aurora.red'
+								color='snow.100'
 								onClick={declineFR}
 								aria-label='Decline Friend Request Button'
 							/>
@@ -132,19 +133,19 @@ const AlertItem: React.FC<AlertItemProps> = ({ alert, mutate }) => {
 	}
 
 	return (
-		<div className='w-full'>
+		<div className='w-full text-sm'>
 			<div
-				className={`w-full alert-item border-solid border-black border-opacity-25 ${
+				className={`flex items-center w-full alert-item border-solid border-black border-opacity-25 px-4 py-2 ${
 					alert.read ? 'bg-night-200 bg-opacity-25' : 'bg-night-400'
 				}`}
 				onContextMenu={handleContextMenu}
 			>
 				<div
-					className={`flex justify-start gap-4 py-1 cursor-pointer w-full ${
+					className={`flex justify-start gap-4 py-1 cursor-pointer w-full flex-grow ${
 						alert.read ? 'text-snow-100' : 'text-frost-100'
 					}`}
 				>
-					<div className='px-4'>{getTimestamp()}</div>
+					<div>{getTimestamp()}</div>
 					<div style={{ fontWeight: alert.read ? 'lighter' : 'bold' }}>{alert.message}</div>
 				</div>
 				{!alert.read && getActions()}

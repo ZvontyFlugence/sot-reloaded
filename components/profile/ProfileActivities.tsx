@@ -8,10 +8,7 @@ interface ProfileActivitiesProps {
 	activities: IActivities
 }
 
-const ProfileActivities: React.FC<ProfileActivitiesProps> = ({
-	profile,
-	activities,
-}) => {
+const ProfileActivities: React.FC<ProfileActivitiesProps> = ({ profile, activities }) => {
 	const router = useRouter()
 
 	// TODO: Figure out how to check if profile is a congressperson or exec branch member
@@ -52,25 +49,17 @@ const ProfileActivities: React.FC<ProfileActivitiesProps> = ({
 
 	return (
 		<div className='bg-night-400 text-snow-100 p-4 shadow-md rounded'>
-			<VStack
-				className='flex flex-col items-center gap-2'
-				divider={<StackDivider borderColor='snow.100' />}
-			>
+			<VStack className='flex flex-col items-center gap-2' divider={<StackDivider borderColor='snow.100' />}>
 				<div
 					className='flex flex-col items-center gap-0.5 cursor-pointer'
 					onClick={() => router.push(`/company/${profile.jobId}`)}
 				>
 					<p className='font-semibold text-aurora-red text-md'>Job</p>
 					{activities.jobInfo ? (
-						<div className='flex gap-4'>
-							<Avatar
-								src={activities.jobInfo.comp.image}
-								name={activities.jobInfo.comp.name}
-							/>
-							<div>
-								<p className='font-semibold'>{activities.jobInfo.comp.name}</p>
-								<p className='text-center'>{activities.jobInfo.title}</p>
-							</div>
+						<div className='flex flex-col items-center gap-2'>
+							<Avatar size='lg' src={activities.jobInfo.comp.image} name={activities.jobInfo.comp.name} />
+							<span className='text-sm font-semibold text-center'>{activities.jobInfo.comp.name}</span>
+							<span className='text-sm text-center'>{activities.jobInfo.title}</span>
 						</div>
 					) : (
 						<p>None</p>
@@ -80,19 +69,12 @@ const ProfileActivities: React.FC<ProfileActivitiesProps> = ({
 					className='flex flex-col text-center gap-0.5 cursor-pointer'
 					onClick={() => router.push(`/party/${profile.partyId}`)}
 				>
-					<p className='font-semibold text-aurora-red text-md'>
-						Political Party
-					</p>
+					<p className='font-semibold text-aurora-red text-md'>Political Party</p>
 					{activities.partyInfo ? (
-						<div className='flex gap-4'>
-							<Avatar
-								src={activities.partyInfo.image}
-								name={activities.partyInfo.name}
-							/>
-							<div>
-								<p className='font-semibold'>{activities.partyInfo.name}</p>
-								<p className='text-center'>{getPartyTitle()}</p>
-							</div>
+						<div className='flex flex-col items-center gap-2'>
+							<Avatar size='lg' src={activities.partyInfo.image} name={activities.partyInfo.name} />
+							<p className='text-sm font-semibold text-center'>{activities.partyInfo.name}</p>
+							<p className='text-sm text-center'>{getPartyTitle()}</p>
 						</div>
 					) : (
 						<p>None</p>
@@ -104,15 +86,10 @@ const ProfileActivities: React.FC<ProfileActivitiesProps> = ({
 				>
 					<p className='font-semibold text-aurora-red text-md'>Military Unit</p>
 					{activities.unitInfo ? (
-						<div className='flex gap-4'>
-							<Avatar
-								src={activities.unitInfo.image}
-								name={activities.unitInfo.name}
-							/>
-							<div>
-								<p className='font-semibold'>{activities.unitInfo.name}</p>
-								<p className='text-center'>{getArmyTitle()}</p>
-							</div>
+						<div className='flex flex-col items-center gap-2'>
+							<Avatar size='lg' src={activities.unitInfo.image} name={activities.unitInfo.name} />
+							<p className='text-sm font-semibold text-center'>{activities.unitInfo.name}</p>
+							<p className='text-sm text-center'>{getArmyTitle()}</p>
 						</div>
 					) : (
 						<p>None</p>
@@ -124,15 +101,10 @@ const ProfileActivities: React.FC<ProfileActivitiesProps> = ({
 				>
 					<p className='font-semibold text-aurora-red text-md'>Newspaper</p>
 					{activities.newsInfo ? (
-						<div className='flex gap-4'>
-							<Avatar
-								src={activities.newsInfo.image}
-								name={activities.newsInfo.name}
-							/>
-							<div>
-								<p className='font-semibold'>{activities.newsInfo.name}</p>
-								<p className='text-center'>{getNewsTitle()}</p>
-							</div>
+						<div className='flex flex-col items-center gap-2'>
+							<Avatar size='lg' src={activities.newsInfo.image} name={activities.newsInfo.name} />
+							<p className='text-sm font-semibold text-center'>{activities.newsInfo.name}</p>
+							<p className='text-sm text-center'>{getNewsTitle()}</p>
 						</div>
 					) : (
 						<p>None</p>

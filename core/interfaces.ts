@@ -88,7 +88,7 @@ export interface IUser {
 	alerts?: Alert[]
 	messages?: MsgThread[]
 	pendingFriends?: PendingFriend[]
-	friends?: IFriend[]
+	friends?: Friend[]
 	ipAddrs?: IpAddr[]
 	banned: boolean
 	superSoldier: number
@@ -136,12 +136,10 @@ export interface IActivities {
 	unitInfo: Unit | null
 }
 
-export type IFriend = Friend & {
-	user: {
-		id: number
-		username: string
-		image: string
-	}
+export type IFriend = {
+	id: number
+	username: string
+	image: string
 }
 
 export type GenericItem = Omit<InvItem | StorageItem, 'comp' | 'compId' | 'user' | 'userId'>

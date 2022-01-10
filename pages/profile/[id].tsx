@@ -11,10 +11,11 @@ import { getSession } from 'next-auth/react'
 
 interface ProfileProps {
 	profile: IUser
+	friends: IFriend[]
 	activities: IActivities
 }
 
-const Profile: React.FC<ProfileProps> = ({ profile, activities }) => {
+const Profile: React.FC<ProfileProps> = ({ profile, friends, activities }) => {
 	return (
 		<Layout>
 			<div className='flex flex-col w-full'>
@@ -32,7 +33,7 @@ const Profile: React.FC<ProfileProps> = ({ profile, activities }) => {
 							</div>
 							<div className='bg-night-400 text-snow-100 p-4 shadow-md rounded'>
 								<p className='font-semibold text-aurora-red text-xl'>
-									<FriendsList friends={profile.friends ?? []} />
+									<FriendsList friends={friends} />
 								</p>
 							</div>
 						</div>
@@ -55,7 +56,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 		}
 	}
 
-	let { profile, ...info } = await withPrisma(async (client: PrismaClient) => {
+	let { profile, friends, ...info } = await withPrisma(async (client: PrismaClient) => {
 		const profile = (await client.user.findFirst({
 			where: { id: Number.parseInt(params?.id as string) },
 			include: {
@@ -66,22 +67,21 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 				residence: {
 					include: { owner: true },
 				},
-				friends: {
-					include: {
-						user: {
-							select: {
-								id: true,
-								username: true,
-								image: true,
-							},
-						},
-					},
-				},
+				friends: true,
 				pendingFriends: true,
 			},
 		})) as IUser | null
 
 		if (!profile) return { profile: null }
+
+		const friends = await client.user.findMany({
+			where: { id: { in: profile?.friends?.map((f) => f.friendId) ?? [] } },
+			select: {
+				id: true,
+				username: true,
+				image: true,
+			},
+		})
 
 		const jobInfo = await client.jobRecord.findFirst({
 			where: { id: profile?.jobId },
@@ -109,7 +109,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 			where: { id: profile?.unitId },
 		})
 
-		return { profile, jobInfo, partyInfo, newsInfo, unitInfo }
+		return { profile, friends, jobInfo, partyInfo, newsInfo, unitInfo }
 	})
 
 	if (!profile) {
@@ -123,6 +123,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 	return {
 		props: {
 			profile: JSON.parse(JSON.stringify(profile)),
+			friends: JSON.parse(JSON.stringify(friends)),
 			activities: JSON.parse(JSON.stringify(info)),
 		},
 	}

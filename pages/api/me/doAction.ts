@@ -94,33 +94,36 @@ async function accept_friend(userId: number, data: { alertId: number }) {
 				if (!alert) throw new Error('Friend Request Not Found')
 				else if (!alert.from) throw new Error('Friend ID Not Provided')
 
-				// Add New Friend to User's Friend List
-				const user = await prisma.user.update({
-					where: { id: userId },
-					data: {
-						friends: {
-							create: { friendId: alert.from },
-						},
-					},
-				})
-
 				// Find Id Of Pending Friend Request
 				const pending = await prisma.pendingFriend.findFirst({
 					where: {
-						userId: alert.from,
-						pending: userId,
+						userId: userId,
+						pending: alert.from,
 					},
 					select: { id: true },
 				})
 
 				if (!pending) throw new Error('Pending Friend Request Not Found')
 
-				// Delete Pending Request
+				// Add New Friend to User's Friend List and Delete Pending Request
+				const user = await prisma.user.update({
+					where: { id: userId },
+					data: {
+						friends: {
+							create: { friendId: alert.from },
+						},
+						pendingFriends: {
+							delete: { id: pending.id },
+						},
+					},
+				})
+
+				// Add User Back to Friend's Account
 				const friend = await prisma.user.update({
 					where: { id: alert.from },
 					data: {
-						pendingFriends: {
-							delete: { id: pending.id },
+						friends: {
+							create: { friendId: userId },
 						},
 					},
 				})
@@ -153,7 +156,7 @@ async function collect_rewards(userId: number) {
 			if (!data) throw new Error('You Have Already Collected Rewards Today')
 
 			let isLevelUp: boolean = false
-			if (data.xp + 1 > neededXP(data.level)) isLevelUp = true
+			if (data.xp + 1 >= neededXP(data.level)) isLevelUp = true
 
 			return await client.user.update({
 				where: {
@@ -203,8 +206,8 @@ async function decline_friend(userId: number, data: { alertId: number }) {
 				// Find Pending Friend Request ID
 				const pending = await prisma.pendingFriend.findFirst({
 					where: {
-						userId: alert.from,
-						pending: userId,
+						userId: userId,
+						pending: alert.from,
 					},
 					select: { id: true },
 				})
@@ -427,17 +430,17 @@ async function heal(userId: number) {
 	try {
 		let updated = await withPrisma(async (client: PrismaClient) => {
 			let query: UserQuery | null = await client.user.findFirst({
-				where: { id: userId },
+				where: { id: userId, canHeal: { lte: new Date(Date.now()) } },
 				select: { health: true },
 			})
 
-			if (!query) throw new Error('User Not Found')
-
+			if (!query) throw new Error('You Have Already Healed Today')
 			if (query.health >= 100) throw new Error('Your Health Is Already Full')
 
 			return await client.user.update({
 				where: { id: userId },
 				data: {
+					canHeal: new Date(new Date().setUTCHours(24, 0, 0, 0)),
 					health: {
 						increment: Math.min(100 - query.health, 50),
 					},
@@ -709,10 +712,36 @@ async function work(userId: number) {
 					},
 				})
 
+				// Ensure User has enough health + check if about to level up
+				const query = await prisma.user.findFirst({
+					where: { id: userId, canWork: { lte: new Date(Date.now()) } },
+					select: { xp: true, level: true, health: true },
+				})
+
+				if (!query) throw new Error('You Have Already Worked Today')
+				if (query.health < 10) throw new Error("You Don't Have Enough Health")
+
+				let isLevelUp: boolean = false
+				let newAlerts: Prisma.AlertCreateWithoutToInput[] = []
+				let reward: number = 0
+				if (query.xp + 1 >= neededXP(query.level)) {
+					isLevelUp = true
+					newAlerts.push(buildLevelUpAlert(query.level + 1))
+					reward += 5
+				}
+
+				// TODO: Handle Hard Worker Medal
+
 				// Add funds to User Balance for Currency
 				let user = await prisma.user.update({
 					where: { id: userId },
 					data: {
+						alerts: isLevelUp ? { create: newAlerts } : undefined,
+						xp: { increment: 1 },
+						health: { decrement: 10 },
+						level: isLevelUp ? { increment: 1 } : undefined,
+						gold: isLevelUp ? { increment: reward } : undefined,
+						canWork: new Date(new Date().setUTCHours(24, 0, 0, 0)),
 						wallet: {
 							upsert: {
 								create: {

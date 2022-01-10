@@ -65,6 +65,8 @@ const Home: React.FC = () => {
 			}).then((data) => {
 				if (data.success) {
 					showToast(toast, 'success', 'Working Complete', data?.message)
+					mutate('/api/me/wallet-info')
+					refreshData(router)
 				} else {
 					showToast(toast, 'error', 'Working Failed', data?.error)
 				}
