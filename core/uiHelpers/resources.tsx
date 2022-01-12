@@ -34,18 +34,31 @@ export const getResource = (value: number) => {
 }
 
 export const getResourceColor = (resource: number): string => {
+	console.log('Resource', resource)
 	switch (resource) {
-		case 1 | 2 | 3:
+		case 1:
+		case 2:
+		case 3:
 			return '#ffd500' // Wheat
-		case 4 | 5 | 6:
+		case 4:
+		case 5:
+		case 6:
 			return '#d6d6d6' // Iron
-		case 7 | 8 | 9:
+		case 7:
+		case 8:
+		case 9:
 			return '#4d4c4c' // Oil
-		case 10 | 11 | 12:
+		case 10:
+		case 11:
+		case 12:
 			return '#bbeb1e' // Uranium
-		case 13 | 14 | 15:
+		case 13:
+		case 14:
+		case 15:
 			return '#a2bfdb' // Aluminum
-		case 16 | 17 | 18:
+		case 16:
+		case 17:
+		case 18:
 			return '#81888f' // Steel
 		default:
 			return '#ffffff' // None
