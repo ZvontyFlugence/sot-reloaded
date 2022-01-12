@@ -52,7 +52,7 @@ const ProfileActivities: React.FC<ProfileActivitiesProps> = ({ profile, activiti
 			<VStack className='flex flex-col items-center gap-2' divider={<StackDivider borderColor='snow.100' />}>
 				<div
 					className='flex flex-col items-center gap-0.5 cursor-pointer'
-					onClick={() => router.push(`/company/${profile.jobId}`)}
+					onClick={() => router.push(`/company/${activities.jobInfo?.compId}`)}
 				>
 					<p className='font-semibold text-aurora-red text-md'>Job</p>
 					{activities.jobInfo ? (
