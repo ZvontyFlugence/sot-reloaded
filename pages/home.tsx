@@ -45,6 +45,7 @@ const Home: React.FC = () => {
 			}).then((data) => {
 				if (data.success) {
 					showToast(toast, 'success', 'Training Complete', data?.message)
+					mutate('/api/me')
 					mutate('/api/me/alerts')
 					refreshData(router)
 				} else {
@@ -65,6 +66,7 @@ const Home: React.FC = () => {
 			}).then((data) => {
 				if (data.success) {
 					showToast(toast, 'success', 'Working Complete', data?.message)
+					mutate('/api/me')
 					mutate('/api/me/wallet-info')
 					refreshData(router)
 				} else {

@@ -89,20 +89,20 @@ const CompanyDetails: React.FC<CompDetailsProps> = ({ company, currency }) => {
 
 	return (
 		<div className='w-full'>
-			<div className='hidden md:block'>
-				<Grid templateColumns='repeat(2, 1fr)' gap={12}>
-					<GridItem>
+			<div className='hidden md:block w-full'>
+				<Grid templateColumns='repeat(2, 1fr)' gap={2}>
+					<GridItem colSpan={1}>
 						<Card>
 							<Card.Header className='text-xl font-semibold text-aurora-red'>Product Offers</Card.Header>
 							<Card.Content className='text-white'>
 								{(company.productOffers?.length ?? 0) === 0 ? (
 									<p>Company has no product offers</p>
 								) : (
-									<Table variant='unstyled'>
+									<Table variant='unstyled' size='sm'>
 										<Thead>
 											<Tr>
 												<Th color='white'>Product</Th>
-												<Th color='white'>Quantity</Th>
+												<Th color='white'>Amount</Th>
 												<Th color='white'>Price</Th>
 												<Th color='white'>Action</Th>
 											</Tr>
@@ -112,7 +112,7 @@ const CompanyDetails: React.FC<CompDetailsProps> = ({ company, currency }) => {
 												<Tr key={i}>
 													<Td>
 														<i className={ITEMS[offer.itemId].image} />
-														{ITEMS[offer.itemId].name}
+														<span className='ml-1'>{ITEMS[offer.itemId].name}</span>
 													</Td>
 													<Td>{offer.quantity}</Td>
 													<Td>
@@ -121,6 +121,7 @@ const CompanyDetails: React.FC<CompDetailsProps> = ({ company, currency }) => {
 													<Td>
 														<Button
 															variant='solid'
+															size='xs'
 															bgColor='frost.400'
 															color='snow.100'
 															colorScheme=''
@@ -137,18 +138,17 @@ const CompanyDetails: React.FC<CompDetailsProps> = ({ company, currency }) => {
 							</Card.Content>
 						</Card>
 					</GridItem>
-					<GridItem>
+					<GridItem colSpan={1}>
 						<Card>
 							<Card.Header className='text-xl font-semibold text-aurora-red'>Job Offers</Card.Header>
-							<Card.Content className='text-white'>
+							<Card.Content className='text-white w-max'>
 								{(company.jobOffers?.length ?? 0) === 0 ? (
 									<p>Company has no job offers</p>
 								) : (
-									<Table>
+									<Table variant='unstyled' size='sm'>
 										<Thead>
 											<Tr>
 												<Th color='white'>Title</Th>
-												<Th color='white'>Positions</Th>
 												<Th color='white'>Wage</Th>
 												<Th color='white'>Action</Th>
 											</Tr>
@@ -158,13 +158,12 @@ const CompanyDetails: React.FC<CompDetailsProps> = ({ company, currency }) => {
 												company.jobOffers?.map((offer, i) => (
 													<Tr key={i}>
 														<Td>{offer.title}</Td>
-														<Td>{offer.quantity}</Td>
 														<Td>
 															{Number.parseFloat(offer.wage.toString()).toFixed(2)} {currency}
 														</Td>
 														<Td>
 															<Button
-																size='sm'
+																size='xs'
 																variant='solid'
 																bgColor='aurora.green'
 																color='snow.100'

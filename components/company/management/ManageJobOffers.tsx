@@ -159,13 +159,13 @@ const ManageJobOffers: React.FC<ManageJobOffersProps> = ({ companyId, jobOffers,
 			) : (
 				<>
 					<p className='text-xl font-semibold text-center mb-2 md:mb-4 text-aurora-red'>Active Offers</p>
-					<div className='hidden md:block'>
+					<div className='hidden md:block w-full'>
 						<Table variant='unstyled'>
 							<Thead>
 								<Tr>
 									<Th color='white'>Position Title</Th>
-									<Th color='white'>Available Positions</Th>
-									<Th color='white'>Position Wage</Th>
+									<Th color='white'>Positions</Th>
+									<Th color='white'>Wage</Th>
 									<Th color='white'>Actions</Th>
 								</Tr>
 							</Thead>
@@ -175,25 +175,29 @@ const ManageJobOffers: React.FC<ManageJobOffersProps> = ({ companyId, jobOffers,
 										<Td>{offer.title}</Td>
 										<Td>{offer.quantity}</Td>
 										<Td>{Number.parseInt(offer.wage.toString()).toFixed(2)}</Td>
-										<Td className='flex gap-4'>
-											<Button
-												variant='solid'
-												bgColor='frost.400'
-												color='snow.100'
-												colorScheme=''
-												onClick={() => handleOpen(i, 'edit')}
-											>
-												Edit
-											</Button>
-											<Button
-												variant='solid'
-												bgColor='aurora.red'
-												color='snow.100'
-												colorScheme=''
-												onClick={() => handleOpen(i, 'delete')}
-											>
-												Delete
-											</Button>
+										<Td>
+											<div className='flex gap-4'>
+												<Button
+													variant='solid'
+													size='sm'
+													bgColor='frost.400'
+													color='snow.100'
+													colorScheme=''
+													onClick={() => handleOpen(i, 'edit')}
+												>
+													Edit
+												</Button>
+												<Button
+													variant='solid'
+													size='sm'
+													bgColor='aurora.red'
+													color='snow.100'
+													colorScheme=''
+													onClick={() => handleOpen(i, 'delete')}
+												>
+													Delete
+												</Button>
+											</div>
 										</Td>
 									</Tr>
 								))}

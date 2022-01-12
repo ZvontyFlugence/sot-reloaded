@@ -142,27 +142,41 @@ const ManageEmployees: React.FC<ManageEmployeesProps> = ({ compId, currency, emp
 							</Thead>
 							<Tbody>
 								{employees.map((emp: IJobRecord, i: number) => (
-									<Tr key={i}>
-										<Td className='flex items-center gap-2 link' onClick={() => router.push(`/profile/${emp.userId}`)}>
-											<Avatar src={emp.user?.image} name={emp.user?.username} />
-											{emp.user?.username}
+									<Tr key={i} className='table-auto'>
+										<Td>
+											<div
+												className='flex items-center gap-2 link'
+												onClick={() => router.push(`/profile/${emp.userId}`)}
+											>
+												<Avatar src={emp.user?.at(0)?.image} name={emp.user?.at(0)?.username} />
+												{emp.user?.at(0)?.username}
+											</div>
 										</Td>
 										<Td>{emp.title}</Td>
 										<Td>
 											{Number.parseFloat(emp.wage).toFixed(2)} {currency}
 										</Td>
-										<Td className='flex items-center gap-4'>
-											<Button variant='solid' bgColor='frost.400' color='snow.100' onClick={() => handleOpenEdit(emp)}>
-												Edit
-											</Button>
-											<Button
-												variant='solid'
-												bgColor='aurora.red'
-												color='snow.100'
-												onClick={() => handleOpenDelete(emp)}
-											>
-												Delete
-											</Button>
+										<Td>
+											<div className='flex items-center gap-4'>
+												<Button
+													variant='solid'
+													size='sm'
+													bgColor='frost.400'
+													color='snow.100'
+													onClick={() => handleOpenEdit(emp)}
+												>
+													Edit
+												</Button>
+												<Button
+													variant='solid'
+													size='sm'
+													bgColor='aurora.red'
+													color='snow.100'
+													onClick={() => handleOpenDelete(emp)}
+												>
+													Delete
+												</Button>
+											</div>
 										</Td>
 									</Tr>
 								))}
@@ -174,11 +188,11 @@ const ManageEmployees: React.FC<ManageEmployeesProps> = ({ compId, currency, emp
 						{employees.map((emp: IJobRecord, i: number) => (
 							<div key={i} className='flex items-center gap-2 w-full'>
 								<div onClick={() => router.push(`/profile/${emp.userId}`)}>
-									<Avatar src={emp.user?.image} name={emp.user?.username} />
+									<Avatar src={emp.user?.at(0)?.image} name={emp.user?.at(0)?.username} />
 								</div>
 								<div className='flex flex-col gap-2 flex-grow'>
 									<span className='text-base link' onClick={() => router.push(`/profile/${emp.userId}`)}>
-										{emp.user?.username}
+										{emp.user?.at(0)?.username}
 									</span>
 									<span className='ml-2'>{emp.title}</span>
 									<span className='ml-2'>
