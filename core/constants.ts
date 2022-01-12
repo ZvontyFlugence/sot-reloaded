@@ -63,12 +63,7 @@ export const MAP_STYLE = [
 	{
 		featureType: 'administrative',
 		elementType: 'geometry.stroke',
-		stylers: [
-			{ color: '#000000' },
-			{ lightness: 17 },
-			{ weight: 1.2 },
-			{ visibility: 'off' },
-		],
+		stylers: [{ color: '#000000' }, { lightness: 17 }, { weight: 1.2 }, { visibility: 'off' }],
 	},
 	{
 		featureType: 'administrative',

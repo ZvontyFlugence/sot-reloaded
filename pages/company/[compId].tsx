@@ -40,15 +40,19 @@ export default Company
 export const getServerSideProps: GetServerSideProps = async (context) => {
 	const { req, params } = context
 	const session = await getSession({ req })
-	if (!session || !session.user.id)
+	if (!session || !session.user.id) {
+		console.log('No Session Provided From NextAuth')
 		return {
 			redirect: { destination: '/', permanent: false },
 		}
+	}
 
-	if (!params || !params?.compId)
+	if (!params || !params?.compId) {
+		console.log('No Params Provided From Next.js')
 		return {
 			redirect: { destination: '/dashboard', permanent: false },
 		}
+	}
 
 	let [company, currency] = await withPrisma(async (client: PrismaClient) => {
 		const company = await client.company.findUnique({
@@ -78,7 +82,10 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 			},
 		})
 
-		if (!company) return [null, null]
+		if (!company) {
+			console.log('No Company Returned By Prisma')
+			return [null, null]
+		}
 
 		const currency = await client.currency.findUnique({
 			where: {
@@ -92,10 +99,12 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 		return [company, currency]
 	})
 
-	if (!company || !currency)
+	if (!company || !currency) {
+		console.log('No Currency Returned By Prisma')
 		return {
 			redirect: { destination: '/dashboard', permanent: false },
 		}
+	}
 
 	return {
 		props: {

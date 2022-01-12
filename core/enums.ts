@@ -32,3 +32,13 @@ export enum CloudinaryFolder {
 	COMPANY = 'company',
 	PROFILE = 'profile',
 }
+
+export enum CompType {
+	WHEAT,
+	IRON,
+	OIL,
+	URANIUM,
+	ALUMINUM,
+	STEEL,
+	BREAD,
+}

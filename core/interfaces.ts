@@ -165,7 +165,7 @@ export interface IJobRecord {
 	id: number
 	comp?: ICompany
 	compId: number
-	user?: { username: string; image: string }
+	user?: { username: string; image: string }[] // Should be only one tho
 	userId: number
 	title: string
 	wage: string

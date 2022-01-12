@@ -31,9 +31,9 @@ const Inventory: React.FC<InventoryProps> = ({ inventory, ...props }) => {
 					key={item.id}
 					item={item}
 					index={i}
-					onSellItem={props.onSellItem && (() => handleSellItem(item))}
-					onClick={!props.onSellItem ? () => handleClick(item) : undefined}
-					displayOnly={!props.displayOnly}
+					onSellItem={props.onSellItem ? () => handleSellItem(item) : undefined}
+					onClick={props.onSellItem ? () => handleClick(item) : undefined}
+					displayOnly={props.displayOnly}
 				/>
 			))}
 		</div>

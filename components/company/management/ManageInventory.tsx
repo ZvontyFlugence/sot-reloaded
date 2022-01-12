@@ -60,7 +60,7 @@ const ManageInventory: React.FC<ManageInventoryProps> = ({ compId, currency, inv
 	}, [countryData])
 
 	const createProductOffer = () => {
-		const currency = countries.find((c) => c.id === country)?.currency
+		const currency = countries.find((c) => c.id === country)?.currency.code
 		if (!currency) return
 
 		request({
@@ -73,7 +73,7 @@ const ManageInventory: React.FC<ManageInventoryProps> = ({ compId, currency, inv
 			},
 		}).then((data) => {
 			if (data.success) {
-				showToast(toast, 'succes', 'Product Offer Created', data?.message)
+				showToast(toast, 'success', 'Product Offer Created', data?.message)
 				refreshData(router)
 				onClose()
 			} else {
@@ -99,6 +99,7 @@ const ManageInventory: React.FC<ManageInventoryProps> = ({ compId, currency, inv
 			</div>
 			<Inventory
 				inventory={inventory}
+				displayOnly={false}
 				onSellItem={onOpen}
 				setSelected={(item: GenericItem) => {
 					setSelected(item as StorageItem)
@@ -115,7 +116,7 @@ const ManageInventory: React.FC<ManageInventoryProps> = ({ compId, currency, inv
 								<p className='mx-auto'>
 									Creating Offer for {quantity}{' '}
 									<i className={`cursor-pointer ${ITEMS[selected.itemId].image}`} title={ITEMS[selected.itemId].name} />{' '}
-									at {price.toFixed(2)} {currency} per unit?
+									at {price.toFixed(2)} {countries.find((c) => c.id === country)?.currency.code ?? currency} per unit?
 								</p>
 								<FormControl>
 									<FormLabel>Quantity</FormLabel>

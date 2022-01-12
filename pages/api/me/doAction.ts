@@ -11,6 +11,7 @@ import {
 	buildSuperSoldierAlert,
 } from '@/core/apiHelpers/alertBuilder'
 import { Decimal } from '@prisma/client/runtime'
+import { calculateProductivity } from '@/core/apiHelpers/productivityHelper'
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
@@ -688,7 +689,22 @@ async function work(userId: number) {
 
 				if (!compFunds || compFunds.amount < job.wage) throw new Error('Insufficient Currency')
 
-				// Subtract Wage from Company
+				// Get Company Type
+				let compInfo = await prisma.company.findUnique({
+					where: { id: job.compId },
+					select: { type: true, inventory: { select: { id: true, itemId: true } } },
+				})
+
+				if (!compInfo) throw new Error('Could Not Find Company Info')
+
+				// Calculate Amount of Product to Generate
+				let produced = calculateProductivity(compInfo.type)
+
+				// Check if Company Already Has Product In Inventory
+				// let itemId = (compInfo?.quality ?? 0) === 0 ? compInfo.type : compInfo.type + compInfo.quality - 1
+				let stockId = compInfo.inventory.find((i) => i.itemId === compInfo?.type)?.id ?? -1
+
+				// Subtract Wage from Company and Add Produced Product
 				let comp = await prisma.company.update({
 					where: { id: job.compId },
 					data: {
@@ -696,6 +712,18 @@ async function work(userId: number) {
 							update: {
 								where: { id: compFunds.id },
 								data: { amount: { decrement: job.wage } },
+							},
+						},
+						inventory: {
+							upsert: {
+								create: {
+									itemId: compInfo.type, // TODO: Implement Company Quality
+									quantity: produced,
+								},
+								update: {
+									quantity: { increment: produced },
+								},
+								where: { id: stockId },
 							},
 						},
 					},
