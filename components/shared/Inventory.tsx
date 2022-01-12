@@ -48,7 +48,7 @@ interface InvItemProps {
 	displayOnly?: boolean
 }
 
-const InventoryItem: React.FC<InvItemProps> = ({ item, index, ...props }) => {
+export const InventoryItem: React.FC<InvItemProps> = ({ item, index, ...props }) => {
 	const itemInfo = ITEMS[item.itemId]
 	const { show, hideAll } = useContextMenu({ id: `item-${item.id}` })
 
@@ -63,12 +63,12 @@ const InventoryItem: React.FC<InvItemProps> = ({ item, index, ...props }) => {
 				className='relative w-full h-20 rounded border border-aurora-red shadow-md cursor-pointer'
 				onContextMenu={!props.displayOnly ? show : undefined}
 			>
-				<div className='absolute -top-px right-0 h-6 px-1 pb-1 w-auto bg-aurora-red text-snow-100 rounded-tr border border-solid border-frost-400'>
+				<div className='absolute -top-px right-0 h-6 px-1 w-auto bg-aurora-red text-snow-100 rounded-tr border border-solid border-frost-400'>
 					<span>{item.quantity}</span>
 				</div>
-				<div className='flex flex-col items-center justify-center mt-1'>
+				<div className='flex flex-col items-center justify-center mt-1.5'>
 					<i className={itemInfo.image} style={{ zoom: itemInfo.quality > 0 ? '150%' : '175%' }} />
-					<p>
+					<p className='mt-1'>
 						{itemInfo.quality > 0 && `Q${itemInfo.quality}`} {itemInfo.name}
 					</p>
 				</div>

@@ -98,7 +98,7 @@ const JobMarket: NextPage<JobMarketProps> = ({ countries, defaultCountryId }) =>
 									<Th color='snow.100'>Company</Th>
 									<Th color='snow.100'>Job Type</Th>
 									<Th color='snow.100'>Job Title</Th>
-									<Th color='snow.100'>Available Positions</Th>
+									<Th color='snow.100'>Quantity</Th>
 									<Th color='snow.100'>Wage</Th>
 									<Th color='snow.100'>Action</Th>
 								</Tr>
