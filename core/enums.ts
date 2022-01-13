@@ -8,7 +8,6 @@ export const UserActions = {
 	MOVE_RESIDENCE: 'move',
 	REMOVE_FR: 'remove_fr',
 	SEND_FR: 'send_fr',
-	SEND_MSG: 'send_msg',
 	TRAIN: 'train',
 	TRAVEL: 'travel',
 	WORK: 'work',
