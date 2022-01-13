@@ -12,7 +12,7 @@ import { useEffect, useState } from 'react'
 import request from '../../core/request'
 import { addMinutes, format } from 'date-fns'
 import useSWR from 'swr'
-import { IAlert, IMsgThread } from '../../core/interfaces'
+import { IAlert, IMail } from '../../core/interfaces'
 import { UserActions } from '../../core/enums'
 import showToast from '../../core/uiHelpers/showToast'
 import { useToast } from '@chakra-ui/toast'
@@ -53,7 +53,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 
 	const [alerts, setAlerts] = useState<IAlert[]>([])
 	const [locInfo, setLocInfo] = useState<LocationInfo>()
-	const [msgThreads, setMsgThreads] = useState<IMsgThread[]>([])
+	const [msgThreads, setMsgThreads] = useState<IMail[]>([])
 	const [walletInfo, setWalletInfo] = useState<WalletInfo[]>([])
 
 	const { data: alertData } = useSWR('/api/me/alerts', alertsFetcher)
