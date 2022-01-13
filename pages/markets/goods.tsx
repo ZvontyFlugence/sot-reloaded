@@ -1,6 +1,7 @@
 import Layout from '@/components/layout/Layout'
 import { InventoryItem } from '@/components/shared/Inventory'
 import Select from '@/components/shared/Select'
+import { ITEMS } from '@/core/constants'
 import { useUser } from '@/core/context/UserContext'
 import withPrisma from '@/core/prismaClient'
 import request from '@/core/request'
@@ -36,12 +37,32 @@ const GoodsMarket: NextPage<GoodsMarketProps> = ({ countries, defaultCountryId }
 	const [country, setCountry] = useState<number>(defaultCountryId)
 	const [productOffers, setProductOffers] = useState<ProductOfferExtended[]>([])
 	const [quantity, setQuantity] = useState<number>(1)
+	const [itemFilter, setItemFilter] = useState<number>(-1)
+	const [qualityFilter, setQualityFilter] = useState<number>(0)
 
 	const { data: productOfferData } = useSWR(`/api/markets/goods?country_id=${country}`, getCountryGoodsOffersFetcher)
 
 	useEffect(() => {
 		if (productOfferData?.productOffers) setProductOffers(productOfferData.productOffers)
 	}, [productOfferData])
+
+	useEffect(() => {
+		if (itemFilter > -1)
+			setProductOffers(
+				(productOfferData?.productOffers as ProductOfferExtended[]).filter((offer) => {
+					if (ITEMS[itemFilter].quality === 0) {
+						// Raw Resource
+						return offer.itemId === itemFilter
+					} else {
+						// Manufactured Product
+						if (qualityFilter === 0) {
+							const diff = offer.itemId - itemFilter
+							return diff <= 5 && diff >= 0
+						} else return offer.itemId === itemFilter + quantity - 1
+					}
+				})
+			)
+	}, [itemFilter, qualityFilter])
 
 	const canPurchase = (priceString: Prisma.Decimal) => {
 		let price = Number.parseFloat(priceString.toString())
@@ -74,6 +95,39 @@ const GoodsMarket: NextPage<GoodsMarketProps> = ({ countries, defaultCountryId }
 						</Select>
 					</div>
 				</h1>
+				<div className='flex justify-center gap-4'>
+					<Select
+						className='relative border border-white border-opacity-25 rounded shadow-md'
+						selected={itemFilter}
+						onChange={(val) => setItemFilter(val)}
+					>
+						<Select.Option key={-1} value={-1}>
+							<span>Any Item</span>
+						</Select.Option>
+						{ITEMS.filter((item) => item.quality <= 1).map((item, i) => (
+							<Select.Option key={i} value={item.id}>
+								<div className='flex items-center gap-2'>
+									<span>{item.name}</span>
+									<i className={item.image} title={item.name} />
+								</div>
+							</Select.Option>
+						))}
+					</Select>
+					{itemFilter !== -1 && (ITEMS.at(itemFilter)?.quality ?? 0) > 0 && (
+						<Select
+							className='relative border border-white border-opacity-25 rounded shadow-md'
+							selected={qualityFilter}
+							onChange={(val) => setQualityFilter(val)}
+						>
+							<Select.Option value={0}>Any Quality</Select.Option>
+							<Select.Option value={1}>Q1</Select.Option>
+							<Select.Option value={2}>Q2</Select.Option>
+							<Select.Option value={3}>Q3</Select.Option>
+							<Select.Option value={4}>Q4</Select.Option>
+							<Select.Option value={5}>Q5</Select.Option>
+						</Select>
+					)}
+				</div>
 				<div className='mt-4 bg-night-400 rounded-md shadow-md'>
 					{productOffers.length === 0 ? (
 						<p className='p-4'>Counry has no product offers</p>
