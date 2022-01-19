@@ -71,6 +71,8 @@ model WalletBalance {
   currency   Currency @relation(fields: [currencyId], references: [id])
   currencyId Int
   amount     Decimal  @default(0.000000000000000000000000000000)
+
+  @@index([currencyId, ownerId])
 }
 
 model Currency {

@@ -1,9 +1,6 @@
-import { IconButton } from '@chakra-ui/button'
-import { useDisclosure } from '@chakra-ui/hooks'
 import { ChevronLeftIcon } from '@chakra-ui/icons'
-import { Box, Container } from '@chakra-ui/layout'
-import { Drawer, DrawerContent, DrawerOverlay } from '@chakra-ui/modal'
-import { useUser } from '../../core/context/UserContext'
+import { Box, Container, Drawer, DrawerContent, DrawerOverlay, IconButton, useDisclosure } from '@chakra-ui/react'
+import { useUser } from '@/core/context/UserContext'
 import Footer from './Footer'
 import Header from './Header'
 import Sidebar from './Sidebar'
@@ -15,14 +12,14 @@ const Layout: React.FC = ({ children }) => {
 	return (
 		<>
 			<div className='relative w-full'>
-				<Container maxW='container.lg'>
+				<Container maxW='container.xl'>
 					<Header user={user} />
 					<Box
 						display='flex'
 						flexDir='row'
 						alignItems='flex-start'
 						gap={8}
-						className='mt-8 md:mt-2 min-h-[43rem] pb-10 w-full'
+						className='mt-8 md:mt-2 min-h-[89vh] pb-10 w-full'
 					>
 						{user && (
 							<>
@@ -45,13 +42,7 @@ const Layout: React.FC = ({ children }) => {
 					<Footer />
 				</Container>
 			</div>
-			<Drawer
-				isOpen={isOpen}
-				placement='left'
-				onClose={onClose}
-				size='full'
-				closeOnOverlayClick
-			>
+			<Drawer isOpen={isOpen} placement='left' onClose={onClose} size='full' closeOnOverlayClick>
 				<DrawerOverlay />
 				<DrawerContent className='pointer-events-none' bgColor='transparent'>
 					<div className='relative -mt-16'>
