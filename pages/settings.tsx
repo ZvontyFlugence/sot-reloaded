@@ -11,6 +11,7 @@ import type { GetServerSideProps, NextPage } from 'next'
 import { getSession } from 'next-auth/react'
 import { ChangeEvent, MouseEvent, useState } from 'react'
 import { useSWRConfig } from 'swr'
+import { useColorModeValue } from '@chakra-ui/system'
 
 interface SettingsProps {
 	regions: Region[]
@@ -139,7 +140,7 @@ const Settings: NextPage<SettingsProps> = ({ regions }) => {
 	return (
 		<Layout>
 			<div className='flex flex-col w-full'>
-				<div className='p-4 md:px-12 bg-night-400 rounded-md'>
+				<div className={`p-4 md:px-12 ${useColorModeValue('bg-snow-300', 'bg-night-400')} rounded-md`}>
 					<Heading color='aurora.red' className='text-2xl font-semibold text-center'>
 						Settings
 					</Heading>
@@ -148,7 +149,10 @@ const Settings: NextPage<SettingsProps> = ({ regions }) => {
 							<FormControl>
 								<FormLabel className='text-xl'>Travel</FormLabel>
 								<Select
-									className='relative border border-white border-opacity-25 rounded shadow-md'
+									className={`relative border ${useColorModeValue(
+										'border-night-300',
+										'border-snow-100'
+									)} border-opacity-25 rounded shadow-md`}
 									selected={selectedRegion}
 									onChange={(val) => setSelectedRegion(val)}
 								>
@@ -165,7 +169,10 @@ const Settings: NextPage<SettingsProps> = ({ regions }) => {
 							<FormControl>
 								<FormLabel className='text-xl'>Move Residence</FormLabel>
 								<Select
-									className='relative border border-white border-opacity-25 rounded shadow-md'
+									className={`relative border ${useColorModeValue(
+										'border-night-300',
+										'border-snow-100'
+									)} border-opacity-25 rounded shadow-md`}
 									selected={selectedRegion}
 									onChange={(val) => setSelectedRegion(val)}
 								>
@@ -190,21 +197,35 @@ const Settings: NextPage<SettingsProps> = ({ regions }) => {
 						</div>
 						<FormControl>
 							<FormLabel className='text-xl'>Update Profile Picture</FormLabel>
-							<Input type='file' accept='image/*' onChange={handleFileChange} />
+							<Input
+								borderColor={useColorModeValue('night.300', 'snow.100')}
+								type='file'
+								accept='image/*'
+								onChange={handleFileChange}
+							/>
 							<Button className='mt-2' variant='outline' color='frost.100' colorScheme='' onClick={handleUpload}>
 								Upload
 							</Button>
 						</FormControl>
 						<FormControl>
 							<FormLabel className='text-xl'>Update Description</FormLabel>
-							<Textarea value={desc} onChange={(e) => setDesc(e.target.value)} />
+							<Textarea
+								borderColor={useColorModeValue('night.300', 'snow.100')}
+								value={desc}
+								onChange={(e) => setDesc(e.target.value)}
+							/>
 							<Button className='mt-2' variant='outline' color='frost.100' colorScheme='' onClick={handleUpdateDesc}>
 								Update
 							</Button>
 						</FormControl>
 						<FormControl>
 							<FormLabel className='text-xl'>Update Username</FormLabel>
-							<Input type='text' value={username} onChange={(e) => setUsername(e.target.value)} />
+							<Input
+								borderColor={useColorModeValue('night.300', 'snow.100')}
+								type='text'
+								value={username}
+								onChange={(e) => setUsername(e.target.value)}
+							/>
 							<Button
 								className='mt-2'
 								variant='outline'
@@ -219,12 +240,14 @@ const Settings: NextPage<SettingsProps> = ({ regions }) => {
 							<FormLabel className='text-xl'>Update Password</FormLabel>
 							<div className='flex md:flex-row flex-col md:justify-between gap-2'>
 								<Input
+									borderColor={useColorModeValue('night.300', 'snow.100')}
 									type='password'
 									placeholder='New Password'
 									value={newPw}
 									onChange={(e) => setNewPw(e.target.value)}
 								/>
 								<Input
+									borderColor={useColorModeValue('night.300', 'snow.100')}
 									type='password'
 									placeholder='Current Password'
 									value={currPw}

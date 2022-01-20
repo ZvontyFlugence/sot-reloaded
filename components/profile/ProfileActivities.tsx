@@ -1,6 +1,7 @@
 import { IActivities, IUser } from '@/core/interfaces'
 import { Avatar } from '@chakra-ui/avatar'
 import { StackDivider, VStack } from '@chakra-ui/layout'
+import { useColorModeValue } from '@chakra-ui/system'
 import { useRouter } from 'next/router'
 
 interface ProfileActivitiesProps {
@@ -48,7 +49,12 @@ const ProfileActivities: React.FC<ProfileActivitiesProps> = ({ profile, activiti
 	}
 
 	return (
-		<div className='bg-night-400 text-snow-100 p-4 shadow-md rounded'>
+		<div
+			className={`${useColorModeValue(
+				'bg-snow-300 text-night-300',
+				'bg-night-400 text-snow-100'
+			)} p-4 shadow-md rounded`}
+		>
 			<VStack className='flex flex-col items-center gap-2' divider={<StackDivider borderColor='snow.100' />}>
 				<div
 					className='flex flex-col items-center gap-0.5 cursor-pointer'

@@ -5,6 +5,7 @@ import { ChevronDownIcon, HamburgerIcon } from '@chakra-ui/icons'
 import { Image } from '@chakra-ui/image'
 import { Box, HStack } from '@chakra-ui/layout'
 import { Menu, MenuButton, MenuItem, MenuList } from '@chakra-ui/menu'
+import { useColorModeValue } from '@chakra-ui/system'
 import { signOut } from 'next-auth/react'
 import { useRouter } from 'next/router'
 
@@ -24,7 +25,7 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
 	}
 
 	const getNewsLink = (): string => {
-		return user && user.newsId > 0 ? `/newspaper/${user.newsId}` : '/dashboard'
+		return user && user.newsId > 0 ? `/newspaper/${user.newsId}` : '/newspaper'
 	}
 
 	const getUnitLink = (): string => {
@@ -59,37 +60,37 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
 									<span className='mr-2'>My Places</span>
 									<ChevronDownIcon />
 								</MenuButton>
-								<MenuList bgColor='night.400'>
+								<MenuList bgColor={useColorModeValue('snow.300', 'night.400')}>
 									<MenuItem
-										_hover={{ bg: 'frost.100', color: 'night.400' }}
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
 										_focus={{ bg: 'frost.100' }}
 										onClick={() => router.push('/home')}
 									>
 										My Home
 									</MenuItem>
 									<MenuItem
-										_hover={{ bg: 'frost.100', color: 'night.400' }}
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
 										_focus={{ bg: 'frost.100' }}
 										onClick={() => router.push('/companies')}
 									>
 										My Companies
 									</MenuItem>
 									<MenuItem
-										_hover={{ bg: 'frost.100', color: 'night.400' }}
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
 										_focus={{ bg: 'frost.100' }}
 										onClick={() => router.push(getPartyLink())}
 									>
 										My Party
 									</MenuItem>
 									<MenuItem
-										_hover={{ bg: 'frost.100', color: 'night.400' }}
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
 										_focus={{ bg: 'frost.100' }}
 										onClick={() => router.push(getNewsLink())}
 									>
 										My Newspaper
 									</MenuItem>
 									<MenuItem
-										_hover={{ bg: 'frost.100', color: 'night.400' }}
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
 										_focus={{ bg: 'frost.100' }}
 										onClick={() => router.push(getUnitLink())}
 									>
@@ -102,25 +103,31 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
 									<span className='mr-2'>Markets</span>
 									<ChevronDownIcon />
 								</MenuButton>
-								<MenuList bgColor='night.400'>
+								<MenuList bgColor={useColorModeValue('snow.300', 'night.400')}>
 									<MenuItem
-										_hover={{ bg: 'frost.100' }}
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
 										_focus={{ bg: 'frost.100' }}
 										onClick={() => router.push('/markets/goods')}
 									>
 										Goods
 									</MenuItem>
 									<MenuItem
-										_hover={{ bg: 'frost.100' }}
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
 										_focus={{ bg: 'frost.100' }}
 										onClick={() => router.push('/markets/jobs')}
 									>
 										Jobs
 									</MenuItem>
-									<MenuItem _hover={{ bg: 'frost.100' }} _focus={{ bg: 'frost.100' }}>
+									<MenuItem
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
+										_focus={{ bg: 'frost.100' }}
+									>
 										Exchange
 									</MenuItem>
-									<MenuItem _hover={{ bg: 'frost.100' }} _focus={{ bg: 'frost.100' }}>
+									<MenuItem
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
+										_focus={{ bg: 'frost.100' }}
+									>
 										Companies
 									</MenuItem>
 								</MenuList>
@@ -133,23 +140,23 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
 									<span className='mr-2'>Social</span>
 									<ChevronDownIcon />
 								</MenuButton>
-								<MenuList bgColor='night.400'>
+								<MenuList bgColor={useColorModeValue('snow.300', 'night.400')}>
 									<MenuItem
-										_hover={{ bg: 'frost.100' }}
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
 										_focus={{ bg: 'frost.100' }}
 										onClick={() => router.push(`/country/${user.countryId}`)}
 									>
 										My Country
 									</MenuItem>
 									<MenuItem
-										_hover={{ bg: 'frost.100' }}
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
 										_focus={{ bg: 'frost.100' }}
 										onClick={() => router.push('/elections')}
 									>
 										Elections
 									</MenuItem>
 									<MenuItem
-										_hover={{ bg: 'frost.100' }}
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
 										_focus={{ bg: 'frost.100' }}
 										onClick={() => router.push('/rankings')}
 									>
@@ -165,30 +172,34 @@ const Header: React.FC<HeaderProps> = ({ user }) => {
 									as={Button}
 									size='sm'
 									colorScheme=''
-									bgColor='night.400'
-									color='snow.100'
+									bgColor={useColorModeValue('snow.300', 'night.400')}
+									color={useColorModeValue('night.300', 'snow.100')}
 									_hover={{ color: 'aurora.red.500' }}
 									_active={{ color: 'aurora.red.500' }}
 									rightIcon={<ChevronDownIcon />}
 								>
 									Account
 								</MenuButton>
-								<MenuList bgColor='night.400'>
+								<MenuList bgColor={useColorModeValue('snow.300', 'night.400')}>
 									<MenuItem
-										_hover={{ bg: 'frost.100' }}
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
 										_focus={{ bg: 'frost.100' }}
 										onClick={() => router.push(`/profile/${user.id}`)}
 									>
 										Profile
 									</MenuItem>
 									<MenuItem
-										_hover={{ bg: 'frost.100' }}
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
 										_focus={{ bg: 'frost.100' }}
 										onClick={() => router.push('/settings')}
 									>
 										Settings
 									</MenuItem>
-									<MenuItem _hover={{ bg: 'frost.100' }} _focus={{ bg: 'frost.100' }} onClick={logout}>
+									<MenuItem
+										_hover={{ bg: 'frost.100', color: useColorModeValue('snow.100', 'night.400') }}
+										_focus={{ bg: 'frost.100' }}
+										onClick={logout}
+									>
 										Logout
 									</MenuItem>
 								</MenuList>

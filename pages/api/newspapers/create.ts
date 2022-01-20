@@ -4,7 +4,6 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { getSession } from 'next-auth/react'
 
 interface ReqBody {
-	image: string
 	name: string
 }
 
@@ -14,23 +13,23 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 			const session = await getSession({ req })
 			if (!session || !session.user.id) return res.status(403).json({ error: 'Unauthorized' })
 
-			const { image, name } = JSON.parse(req.body) as ReqBody
+			const { name } = JSON.parse(req.body) as ReqBody
 
 			try {
-				let created = await withPrisma(async client => {
-					return await client.$transaction(async prisma => {
+				let created = await withPrisma(async (client) => {
+					return await client.$transaction(async (prisma) => {
 						const author = await client.user.update({
 							where: { id: session.user.id },
 							data: {
-								gold: { decrement: 10 },
+								gold: { decrement: 5 },
 								newspaper: {
 									create: {
-										image,
-										name
-									}
-								}
+										image: process.env.DEFAULT_IMG as string,
+										name,
+									},
+								},
 							},
-							select: { gold: true }
+							select: { gold: true, newsId: true },
 						})
 
 						if (!author || convertDecimal(author.gold) < 0) throw new Error('Insufficient Funds')
@@ -39,7 +38,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 					})
 				})
 
-				if (created) return res.status(200).json({ success: true })
+				if (created) return res.status(200).json({ success: true, newsId: created[0].newsId })
 
 				return res.status(500).json({ success: false, error: 'Something Went Wrong' })
 			} catch (e: any) {

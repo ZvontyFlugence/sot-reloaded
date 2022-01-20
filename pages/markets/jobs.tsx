@@ -13,6 +13,7 @@ import { getSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
+import { useColorModeValue } from '@chakra-ui/system'
 
 interface JobMarketProps {
 	defaultCountryId: number
@@ -71,7 +72,10 @@ const JobMarket: NextPage<JobMarketProps> = ({ countries, defaultCountryId }) =>
 					<span className='text-2xl font-semibold text-aurora-red'>Job Market</span>
 					<div>
 						<Select
-							className='relative border border-white border-opacity-25 rounded shadow-md'
+							className={`relative border ${useColorModeValue(
+								'border-night-300',
+								'border-snow-100'
+							)} border-opacity-25 rounded shadow-md`}
 							selected={country}
 							onChange={(val) => setCountry(val)}
 						>
@@ -88,19 +92,23 @@ const JobMarket: NextPage<JobMarketProps> = ({ countries, defaultCountryId }) =>
 						</Select>
 					</div>
 				</h1>
-				<div className='mt-4 bg-night-400 rounded-md shadow-md'>
+				<div className={`mt-4 ${useColorModeValue('bg-snow-300', 'bg-night-400')} rounded-md shadow-md`}>
 					{jobOffers.length === 0 ? (
 						<p className='p-4'>Country has no job offers</p>
 					) : (
-						<Table variant='unstyled' bgColor='night.400' color='snow.100'>
+						<Table
+							variant='unstyled'
+							bgColor={useColorModeValue('snow.300', 'night.400')}
+							color={useColorModeValue('night.300', 'snow.100')}
+						>
 							<Thead>
 								<Tr>
-									<Th color='snow.100'>Company</Th>
-									<Th color='snow.100'>Job Type</Th>
-									<Th color='snow.100'>Job Title</Th>
-									<Th color='snow.100'>Quantity</Th>
-									<Th color='snow.100'>Wage</Th>
-									<Th color='snow.100'>Action</Th>
+									<Th color={useColorModeValue('night.300', 'snow.100')}>Company</Th>
+									<Th color={useColorModeValue('night.300', 'snow.100')}>Job Type</Th>
+									<Th color={useColorModeValue('night.300', 'snow.100')}>Job Title</Th>
+									<Th color={useColorModeValue('night.300', 'snow.100')}>Quantity</Th>
+									<Th color={useColorModeValue('night.300', 'snow.100')}>Wage</Th>
+									<Th color={useColorModeValue('night.300', 'snow.100')}>Action</Th>
 								</Tr>
 							</Thead>
 							<Tbody>

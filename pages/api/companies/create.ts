@@ -30,7 +30,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 				return await client.company.create({
 					data: {
 						name,
-						image: process.env.DEFAULT_IMG,
+						image: process.env.DEFAULT_IMG as string,
 						type,
 						ceo: {
 							connect: {

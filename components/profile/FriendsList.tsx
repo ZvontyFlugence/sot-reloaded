@@ -1,5 +1,6 @@
 import { IFriend } from '@/core/interfaces'
 import { Avatar } from '@chakra-ui/avatar'
+import { useColorModeValue } from '@chakra-ui/system'
 import { useRouter } from 'next/router'
 
 interface FriendsListProps {
@@ -15,7 +16,10 @@ const FriendsList: React.FC<FriendsListProps> = ({ friends }) => {
 				friends.map((friend) => (
 					<div
 						key={friend.id}
-						className='flex flex-col items-center cursor-pointer rounded shadow-md border border-snow-100 border-opacity-25 p-2'
+						className={`flex flex-col items-center cursor-pointer rounded shadow-md border ${useColorModeValue(
+							'border-night-300',
+							'border-snow-100'
+						)} border-opacity-25 p-2`}
 						onClick={() => router.push(`/profile/${friend.id}`)}
 					>
 						<Avatar boxSize='3.0rem' src={friend.image} alt={friend.username} />
@@ -23,7 +27,14 @@ const FriendsList: React.FC<FriendsListProps> = ({ friends }) => {
 					</div>
 				))
 			) : (
-				<p className='col-span-1 md:col-span-5 text-center text-lg text-snow-100'>No friends</p>
+				<p
+					className={`col-span-1 md:col-span-5 text-center text-lg ${useColorModeValue(
+						'text-night-300',
+						'text-snow-100'
+					)}`}
+				>
+					No friends
+				</p>
 			)}
 		</div>
 	)

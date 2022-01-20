@@ -3,6 +3,7 @@ import { IJobRecord } from '@/core/interfaces'
 import { Avatar } from '@chakra-ui/avatar'
 import { Button } from '@chakra-ui/button'
 import { Grid, GridItem, Heading } from '@chakra-ui/layout'
+import { useColorModeValue } from '@chakra-ui/system'
 import { useToast } from '@chakra-ui/toast'
 import { GetServerSideProps } from 'next'
 import { getSession } from 'next-auth/react'
@@ -88,8 +89,12 @@ const Home: React.FC = () => {
 					<Grid className='mt-8' w='full' templateColumns='repeat(5, 1fr)' gap={12}>
 						<GridItem colSpan={2}>
 							<Card>
-								<Card.Header className='text-xl font-semibold text-white'>Gym</Card.Header>
-								<Card.Content className='text-white'>
+								<Card.Header
+									className={`text-xl font-semibold ${useColorModeValue('text-night-300', 'text-snow-100')}`}
+								>
+									Gym
+								</Card.Header>
+								<Card.Content className={useColorModeValue('text-night-300', 'text-snow-100')}>
 									<p>
 										Current Strength: {user.strength} <i className='sot-icon sot-str' />
 									</p>
@@ -109,8 +114,12 @@ const Home: React.FC = () => {
 						</GridItem>
 						<GridItem colStart={3} colEnd={6}>
 							<Card>
-								<Card.Header className='text-xl font-semibold text-white'>Work</Card.Header>
-								<Card.Content className='text-white'>
+								<Card.Header
+									className={`text-xl font-semibold ${useColorModeValue('text-night-300', 'text-snow-100')}`}
+								>
+									Work
+								</Card.Header>
+								<Card.Content className={useColorModeValue('text-night-300', 'text-snow-100')}>
 									{job && job.comp ? (
 										<div className='flex justify-between items-center mt-2'>
 											<div
@@ -152,8 +161,12 @@ const Home: React.FC = () => {
 						</GridItem>
 						<GridItem colSpan={5}>
 							<Card>
-								<Card.Header className='text-xl font-semibold text-white'>Inventory</Card.Header>
-								<Card.Content className='text-white'>
+								<Card.Header
+									className={`text-xl font-semibold ${useColorModeValue('text-night-300', 'text-snow-100')}`}
+								>
+									Inventory
+								</Card.Header>
+								<Card.Content className={useColorModeValue('text-night-300', 'text-snow-100')}>
 									<div>Inventory Here</div>
 								</Card.Content>
 							</Card>

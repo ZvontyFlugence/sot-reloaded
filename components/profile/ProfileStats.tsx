@@ -1,5 +1,6 @@
 import { IUser } from '@/core/interfaces'
 import { Stat, StatLabel, StatNumber } from '@chakra-ui/stat'
+import { useColorModeValue } from '@chakra-ui/system'
 
 interface ProfileStatsProps {
 	profile: IUser
@@ -7,7 +8,7 @@ interface ProfileStatsProps {
 
 const ProfileStats: React.FC<ProfileStatsProps> = ({ profile }) => {
 	return (
-		<div className='text-snow-100 w-min'>
+		<div className={`${useColorModeValue('text-night-300', 'text-snow-100')} w-min`}>
 			<Stat>
 				<StatLabel>
 					<span className='font-semibold text-frost-100 text-lg'>Strength</span>

@@ -12,6 +12,7 @@ import { getSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import useSWR from 'swr'
+import { useColorModeValue } from '@chakra-ui/system'
 
 interface GoodsMarketProps {
 	defaultCountryId: number
@@ -97,7 +98,10 @@ const GoodsMarket: NextPage<GoodsMarketProps> = ({ countries, defaultCountryId }
 				</h1>
 				<div className='flex justify-center gap-4'>
 					<Select
-						className='relative border border-white border-opacity-25 rounded shadow-md'
+						className={`relative border ${useColorModeValue(
+							'border-night-300',
+							'border-snow-100'
+						)} border-opacity-25 rounded shadow-md`}
 						selected={itemFilter}
 						onChange={(val) => setItemFilter(val)}
 					>
@@ -115,7 +119,10 @@ const GoodsMarket: NextPage<GoodsMarketProps> = ({ countries, defaultCountryId }
 					</Select>
 					{itemFilter !== -1 && (ITEMS.at(itemFilter)?.quality ?? 0) > 0 && (
 						<Select
-							className='relative border border-white border-opacity-25 rounded shadow-md'
+							className={`relative border ${useColorModeValue(
+								'border-night-300',
+								'border-snow-100'
+							)} border-opacity-25 rounded shadow-md`}
 							selected={qualityFilter}
 							onChange={(val) => setQualityFilter(val)}
 						>
@@ -128,19 +135,23 @@ const GoodsMarket: NextPage<GoodsMarketProps> = ({ countries, defaultCountryId }
 						</Select>
 					)}
 				</div>
-				<div className='mt-4 bg-night-400 rounded-md shadow-md'>
+				<div className={`mt-4 ${useColorModeValue('bg-snow-300', 'bg-night-400')} rounded-md shadow-md`}>
 					{productOffers.length === 0 ? (
 						<p className='p-4'>Counry has no product offers</p>
 					) : (
 						<>
 							{/* TODO: Product Type and Quality Filters */}
-							<Table variant='unstyled' bgColor='night.400' color='snow.100'>
+							<Table
+								variant='unstyled'
+								bgColor={useColorModeValue('snow.300', 'night.400')}
+								color={useColorModeValue('night.300', 'snow.100')}
+							>
 								<Thead>
 									<Tr>
-										<Th color='snow.100'>Company</Th>
-										<Th color='snow.100'>Product</Th>
-										<Th color='snow.100'>Price Per Unit</Th>
-										<Th color='snow.100'>Action</Th>
+										<Th color={useColorModeValue('night.300', 'snow.100')}>Company</Th>
+										<Th color={useColorModeValue('night.300', 'snow.100')}>Product</Th>
+										<Th color={useColorModeValue('night.300', 'snow.100')}>Price Per Unit</Th>
+										<Th color={useColorModeValue('night.300', 'snow.100')}>Action</Th>
 									</Tr>
 								</Thead>
 								<Tbody>

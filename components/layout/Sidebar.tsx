@@ -16,6 +16,7 @@ import { IAlert, IMail } from '../../core/interfaces'
 import { UserActions } from '../../core/enums'
 import showToast from '../../core/uiHelpers/showToast'
 import { useToast } from '@chakra-ui/toast'
+import { useColorModeValue } from '@chakra-ui/react'
 
 interface SidebarProps {
 	user: User
@@ -97,13 +98,13 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 	}
 
 	return (
-		<VStack className='p-4 rounded-md' bg='night.400' w='15rem'>
+		<VStack className={`p-4 rounded-md ${useColorModeValue('bg-snow-300', 'bg-night-400')}`} w='15rem'>
 			<div
-				className='flex flex-col justify-center items-center gap-2 text-sm link w-full'
+				className='flex flex-col justify-center items-center gap-2 text-sm cursor-pointer w-full'
 				onClick={() => router.push(`/profile/${user.id}`)}
 			>
 				<Image boxSize='5.0rem' rounded='full' src={user.image} />
-				<span className='flex items-center gap-2'>
+				<span className={`flex items-center gap-2 ${useColorModeValue('text-night-300', 'text-snow-100')} link`}>
 					{user.username}{' '}
 					<Tag variant='solid' bg='frost.200' color='white'>
 						{user.level}
@@ -112,7 +113,11 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 			</div>
 			<HStack className='mt-4' gap={5}>
 				<Button
-					color={msgThreads.filter((thr) => !thr.read).length > 0 ? 'aurora.red' : 'snow.100'}
+					color={
+						msgThreads.filter((m) => !m.read).length > 0
+							? 'aurora.red'
+							: `${useColorModeValue('night.300', 'snow.100')}`
+					}
 					variant='ghost'
 					aria-label='View Mail'
 					colorScheme=''
@@ -123,7 +128,9 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 					{msgThreads.filter((thread) => !thread.read).length}
 				</Button>
 				<Button
-					color={alerts.filter((a) => !a.read).length > 0 ? 'aurora.red' : 'snow.100'}
+					color={
+						alerts.filter((a) => !a.read).length > 0 ? 'aurora.red' : `${useColorModeValue('night.300', 'snow.100')}`
+					}
 					variant='ghost'
 					aria-label='View Alerts'
 					colorScheme=''
@@ -157,7 +164,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 			<Button
 				variant='solid'
 				colorScheme='aurora.green'
-				color='white'
+				color='snow.100'
 				size='sm'
 				width='50%'
 				leftIcon={<GiHeartPlus />}
@@ -169,14 +176,16 @@ const Sidebar: React.FC<SidebarProps> = ({ user }) => {
 			<VStack className='mt-8 w-full'>
 				{locInfo && (
 					<HStack display='flex' justifyContent='space-between' className='text-sm w-full'>
-						<span>
+						<span className={useColorModeValue('text-night-300', 'text-snow-100')}>
 							<span className='link' onClick={() => router.push(`/region/${locInfo.id}`)}>
 								{locInfo.name}
 							</span>
 							,
 						</span>
-						<div className='flex items-center gap-2 link' onClick={() => router.push(`/country/${locInfo.owner.id}`)}>
-							<span>{locInfo.owner.nick}</span>
+						<div className='flex items-center gap-2' onClick={() => router.push(`/country/${locInfo.owner.id}`)}>
+							<span className={`${useColorModeValue('text-night-300', 'text-snow-100')} link`}>
+								{locInfo.owner.nick}
+							</span>
 							<span className='sot-flag-wrap'>
 								<i className={`sot-flag sot-flag-${locInfo.owner.flagCode} h-7`} />
 							</span>

@@ -14,6 +14,7 @@ import refreshData from '@/core/uiHelpers/refreshData'
 import { useEffect, useState } from 'react'
 import { Friend, PendingFriend } from '@prisma/client'
 import useSWR from 'swr'
+import { useColorModeValue } from '@chakra-ui/system'
 
 interface ProfileHeaderProps {
 	profile: IUser
@@ -91,7 +92,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile }) => {
 				aria-label='Account Settings'
 				variant='outline'
 				size='sm'
-				color='snow.300'
+				color={useColorModeValue('night.300', 'snow.100')}
 				colorScheme='whiteAlpha'
 				title='Account Settings'
 				icon={<SettingsIcon />}
@@ -100,8 +101,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile }) => {
 			/>
 		) : (
 			<VStack spacing={2} align='top'>
-				{console.log('Friends:', profile.friends)}
-				{console.log('Pending', profile.pendingFriends)}
 				{profile.friends?.findIndex((fr) => fr.friendId === user?.id) === -1 ? (
 					<IconButton
 						aria-label='Add Friend'
@@ -162,7 +161,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile }) => {
 
 	return user ? (
 		<>
-			<div className='hidden md:block bg-night-400 text-snow-100 p-4 shadow-md rounded'>
+			<div
+				className={`hidden md:block ${useColorModeValue(
+					'bg-snow-300 text-night-300',
+					'bg-night-400 text-snow-100'
+				)} p-4 shadow-md rounded`}
+			>
 				<div className='flex items-stretch gap-4'>
 					<Image boxSize={'10.0rem'} borderRadius='full' src={profile.image} alt={profile.username} />
 					<div className='flex flex-col w-full items-top'>
@@ -194,7 +198,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ profile }) => {
 						</p>
 						<p className='flex flex-col mt-1'>
 							<span>Description:</span>
-							<span className='border border-solid border-white border-opacity-25 p-2 w-full rounded-md'>
+							<span
+								className={`border border-solid ${useColorModeValue(
+									'border-night-300',
+									'border-snow-100'
+								)} border-opacity-25 p-2 w-full rounded-md`}
+							>
 								<i>{profile.description}</i>
 							</span>
 						</p>

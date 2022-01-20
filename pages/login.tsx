@@ -80,7 +80,7 @@ const Login: React.FC = () => {
 									</Text>
 								</p>
 								<p>
-									Don't Have an account?
+									<span className='text-snow-100'>Don't Have an Account?</span>
 									<Text
 										className='inline-block ml-2 cursor-pointer'
 										color='frost.100'

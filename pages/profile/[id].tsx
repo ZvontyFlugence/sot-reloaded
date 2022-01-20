@@ -5,6 +5,7 @@ import ProfileHeader from '@/components/profile/ProfileHeader'
 import ProfileStats from '@/components/profile/ProfileStats'
 import { IActivities, IFriend, IUser } from '@/core/interfaces'
 import withPrisma from '@/core/prismaClient'
+import { useColorModeValue } from '@chakra-ui/system'
 import { PrismaClient } from '@prisma/client'
 import { GetServerSideProps } from 'next'
 import { getSession } from 'next-auth/react'
@@ -26,12 +27,12 @@ const Profile: React.FC<ProfileProps> = ({ profile, friends, activities }) => {
 							<ProfileActivities profile={profile} activities={activities} />
 						</div>
 						<div className='w-1/2 md:w-3/4 flex flex-col gap-4'>
-							<div className='bg-night-400 text-snow-100 p-4 shadow-md rounded'>
+							<div className={`${useColorModeValue('bg-snow-300', 'bg-night-400')} p-4 shadow-md rounded`}>
 								<p className='font-semibold text-aurora-red text-xl'>
 									<ProfileStats profile={profile} />
 								</p>
 							</div>
-							<div className='bg-night-400 text-snow-100 p-4 shadow-md rounded'>
+							<div className={`${useColorModeValue('bg-snow-300', 'bg-night-400')} p-4 shadow-md rounded`}>
 								<p className='font-semibold text-aurora-red text-xl'>
 									<FriendsList friends={friends} />
 								</p>

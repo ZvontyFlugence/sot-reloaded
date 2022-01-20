@@ -45,10 +45,6 @@ a {
 	cursor: pointer;
 }
 
-.link {
-	color: #eceff4;
-}
-
 .link:hover {
 	color: #8fbcbb;
 	text-decoration: underline;
