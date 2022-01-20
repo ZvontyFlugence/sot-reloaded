@@ -11,51 +11,53 @@ datasource db {
 }
 
 model User {
-  id                    Int             @id @default(autoincrement())
-  username              String          @db.VarChar(45)
-  email                 String          @unique @db.VarChar(255)
-  password              String          @db.VarChar(255)
-  image                 String
-  createdOn             DateTime        @default(now())
-  description           String?
-  level                 Int             @default(1)
-  xp                    Int             @default(0)
-  health                Int             @default(100)
-  country               Country         @relation(fields: [countryId], references: [id])
-  countryId             Int
-  gold                  Decimal         @default(5.000000000000000000000000000000)
-  strength              Int             @default(0)
-  militaryRank          Int             @default(0)
-  totalDmg              Int             @default(0)
-  patriotDmg            PatriotDamage[]
-  location              Region          @relation("UserLocation", fields: [locationId], references: [id])
-  locationId            Int
-  residence             Region          @relation("UserResidence", fields: [residenceId], references: [id])
-  residenceId           Int
-  job                   JobRecord?      @relation(fields: [jobId], references: [id])
-  jobId                 Int             @default(-1)
-  party                 Party?          @relation(fields: [partyId], references: [id])
-  partyId               Int             @default(-1)
-  unit                  Unit?           @relation(fields: [unitId], references: [id])
-  unitId                Int             @default(-1)
-  newspaper             Newspaper?
-  newsId                Int             @default(-1)
-  companies             Company[]
-  canTrain              DateTime        @default(now())
-  canWork               DateTime        @default(now())
-  canCollectRewards     DateTime        @default(now())
-  canHeal               DateTime        @default(now())
-  wallet                WalletBalance[]
-  inventory             InvItem[]
-  alerts                Alert[]
-  messages              Mail[]
-  pendingFriends        PendingFriend[]
-  friends               Friend[]
-  ipAddrs               IpAddr[]
-  banned                Boolean         @default(false)
-  superSoldier          Int             @default(0)
+  id                Int             @id @default(autoincrement())
+  username          String          @db.VarChar(45)
+  email             String          @unique @db.VarChar(255)
+  password          String          @db.VarChar(255)
+  image             String
+  createdOn         DateTime        @default(now())
+  description       String?
+  level             Int             @default(1)
+  xp                Int             @default(0)
+  health            Int             @default(100)
+  country           Country         @relation(fields: [countryId], references: [id])
+  countryId         Int
+  gold              Decimal         @default(5.000000000000000000000000000000)
+  strength          Int             @default(0)
+  militaryRank      Int             @default(0)
+  totalDmg          Int             @default(0)
+  patriotDmg        PatriotDamage[]
+  location          Region          @relation("UserLocation", fields: [locationId], references: [id])
+  locationId        Int
+  residence         Region          @relation("UserResidence", fields: [residenceId], references: [id])
+  residenceId       Int
+  job               JobRecord?      @relation(fields: [jobId], references: [id])
+  jobId             Int             @default(-1)
+  party             Party?          @relation(fields: [partyId], references: [id])
+  partyId           Int             @default(-1)
+  unit              Unit?           @relation(fields: [unitId], references: [id])
+  unitId            Int             @default(-1)
+  newspaper         Newspaper?      @relation("NewspaperAuthor", fields: [newsId], references: [id])
+  newsId            Int             @unique @default(-1)
+  companies         Company[]
+  canTrain          DateTime        @default(now())
+  canWork           DateTime        @default(now())
+  canCollectRewards DateTime        @default(now())
+  canHeal           DateTime        @default(now())
+  wallet            WalletBalance[]
+  inventory         InvItem[]
+  alerts            Alert[]
+  messages          Mail[]
+  pendingFriends    PendingFriend[]
+  friends           Friend[]
+  ipAddrs           IpAddr[]
+  banned            Boolean         @default(false)
+  superSoldier      Int             @default(0)
 
-  participatingThreads  MsgThread[]
+  participatingThreads MsgThread[]
+  subscribedNewspapers Newspaper[] @relation("NewspaperSubscriber")
+  likedArticles        Article[]
 }
 
 model PatriotDamage {
@@ -117,11 +119,11 @@ model Alert {
 }
 
 model Mail {
-  thread    MsgThread @relation(fields: [threadId], references: [id])
-  threadId  Int
-  user      User      @relation(fields: [userId], references: [id])
-  userId    Int
-  read      Boolean   @default(false)
+  thread   MsgThread @relation(fields: [threadId], references: [id])
+  threadId Int
+  user     User      @relation(fields: [userId], references: [id])
+  userId   Int
+  read     Boolean   @default(false)
 
   @@id([threadId, userId])
 }
@@ -133,7 +135,7 @@ model MsgThread {
   messages     Msg[]
   timestamp    DateTime @default(now())
 
-  instances    Mail[]
+  instances Mail[]
 }
 
 model Msg {
@@ -246,7 +248,7 @@ model Company {
 }
 
 model FundsBalance {
-  id         String   @id @default(cuid())
+  id         Int      @id @default(autoincrement())
   comp       Company  @relation(fields: [compId], references: [id])
   compId     Int
   currency   Currency @relation(fields: [currencyId], references: [code])
@@ -343,9 +345,21 @@ model Unit {
 }
 
 model Newspaper {
-  id       Int    @id @default(autoincrement())
-  name     String @db.VarChar(60)
-  image    String @db.VarChar(255)
-  author   User   @relation(fields: [authorId], references: [id])
-  authorId Int    @unique
+  id          Int       @id @default(autoincrement())
+  name        String    @db.VarChar(60)
+  image       String    @db.VarChar(255)
+  author      User?     @relation("NewspaperAuthor")
+  subscribers User[]    @relation("NewspaperSubscriber")
+  articles    Article[]
+}
+
+model Article {
+  id          Int        @id @default(autoincrement())
+  newspaper   Newspaper? @relation(fields: [newsId], references: [id])
+  newsId      Int
+  title       String
+  text        String
+  publishDate DateTime
+  published   Boolean
+  likes       User[]
 }
