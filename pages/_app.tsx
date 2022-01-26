@@ -5,7 +5,7 @@ import theme from '../core/theme'
 import Head from 'next/head'
 import { GetServerSideProps } from 'next'
 import { UserProvider } from '../core/context/UserContext'
-import { PrismaClient, User } from '.prisma/client'
+import { User } from '.prisma/client'
 import withPrisma from '../core/prismaClient'
 import AuthWrapper from '../components/shared/AuthWrapper'
 
@@ -39,14 +39,14 @@ const App = ({ Component, pageProps: { session, user, ...pageProps } }: AppProps
 
 export default App
 
-export const getServerSideProps: GetServerSideProps = async context => {
+export const getServerSideProps: GetServerSideProps = async (context) => {
 	const { req } = context
 	const session = await getSession({ req })
 
 	let user: User | null = null
 
 	if (session && session.user.id) {
-		user = await withPrisma(async client => {
+		user = await withPrisma(async (client) => {
 			return await client.user.findUnique({ where: { id: session.user.id } })
 		})
 	}
@@ -54,7 +54,7 @@ export const getServerSideProps: GetServerSideProps = async context => {
 	return {
 		props: {
 			session,
-			user: user ? JSON.parse(JSON.stringify(user)) : undefined
-		}
+			user: user ? JSON.parse(JSON.stringify(user)) : undefined,
+		},
 	}
 }

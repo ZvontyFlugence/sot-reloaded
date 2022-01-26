@@ -189,7 +189,7 @@ model TreasuryBalanace {
   country      Country  @relation(fields: [countryId], references: [id])
   countryId    Int
   currency     Currency @relation(fields: [currencyCode], references: [code])
-  currencyCode String   @unique @db.VarChar(3)
+  currencyCode String   @db.VarChar(3)
   amount       Decimal  @default(10000.000000000000000000000000000000)
 }
 
@@ -252,7 +252,7 @@ model FundsBalance {
   comp       Company  @relation(fields: [compId], references: [id])
   compId     Int
   currency   Currency @relation(fields: [currencyId], references: [code])
-  currencyId String   @unique @db.VarChar(3)
+  currencyId String   @db.VarChar(3)
   amount     Decimal  @default(0.000000000000000000000000000000)
 }
 

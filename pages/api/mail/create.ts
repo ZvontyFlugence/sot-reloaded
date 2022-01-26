@@ -17,7 +17,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
 			const { participants, subject, content } = JSON.parse(req.body) as ReqBody
 
-			let [thread, msg] = await withPrisma(async (client: PrismaClient) => {
+			let [instances, thread, msg] = await withPrisma(async (client: PrismaClient) => {
 				let thread = await client.msgThread.create({
 					data: {
 						subject,
@@ -27,6 +27,18 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 					},
 				})
 
+				let instances = await Promise.all(
+					participants.map(async (p: number) => {
+						return await client.mail.createMany({
+							data: {
+								threadId: thread.id,
+								userId: p,
+								read: p === session.user.id,
+							},
+						})
+					})
+				)
+
 				let msg = await client.msg.create({
 					data: {
 						content,
@@ -35,10 +47,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 					},
 				})
 
-				return [thread, msg]
+				return [instances, thread, msg]
 			})
 
-			if (thread && msg) return res.status(200).json({ success: true })
+			if (instances && thread && msg) return res.status(200).json({ success: true })
 			return res.status(500).json({ error: 'Something Went Wrong' })
 		}
 		default:

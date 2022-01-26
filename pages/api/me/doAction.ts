@@ -12,6 +12,7 @@ import {
 } from '@/core/apiHelpers/alertBuilder'
 import { Decimal } from '@prisma/client/runtime'
 import { calculateProductivity } from '@/core/apiHelpers/productivityHelper'
+import convertDecimal from '@/core/uiHelpers/convertDecimal'
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
 	try {
@@ -626,6 +627,9 @@ async function train(userId: number) {
 	}
 }
 
+// TODO: Reject if user already located at region
+// TODO: Use djikstras algorithm (or similar) to determine distance of travel
+// TODO: Determine cost based on travel distance, reject if insufficient funds
 async function travel(userId: number, data: { regionId: number }) {
 	let updated = await withPrisma(async (client: PrismaClient) => {
 		return await client.user.update({
@@ -687,7 +691,8 @@ async function work(userId: number) {
 					},
 				})
 
-				if (!compFunds || compFunds.amount < job.wage) throw new Error('Insufficient Currency')
+				if (!compFunds || convertDecimal(compFunds.amount) < convertDecimal(job.wage))
+					throw new Error('Insufficient Currency')
 
 				// Get Company Type
 				let compInfo = await prisma.company.findUnique({

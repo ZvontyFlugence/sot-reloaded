@@ -25,7 +25,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 				let result = await withPrisma(async (client: PrismaClient) => {
 					return await client.$transaction(async (prisma) => {
 						// Find Comp Funds Balance For Desired Currency
-						let fundsBalanceId: string = ''
+						let fundsBalanceId: number = -1
 
 						if (funds) {
 							const compFunds = await prisma.fundsBalance.findFirst({

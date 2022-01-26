@@ -23,7 +23,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 
 			try {
 				let result = await withPrisma(async (client: PrismaClient) => {
-					return await client.$transaction(async prisma => {
+					return await client.$transaction(async (prisma) => {
 						// Find User Wallet Balance For Desired Currency
 						let walletBalanceId: number = -1
 
@@ -32,10 +32,10 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 								where: {
 									ownerId: session.user.id,
 									currency: {
-										code: funds?.currency
-									}
+										code: funds?.currency,
+									},
 								},
-								select: { id: true }
+								select: { id: true },
 							})
 
 							if (!userWallet) throw new Error('Wallet Balance Not Found')
@@ -45,7 +45,7 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 						// Subtract Gold and/or Balance from User
 						const sender = await prisma.user.update({
 							where: {
-								id: session.user.id
+								id: session.user.id,
 							},
 							data: {
 								gold: gold ? { decrement: gold } : undefined,
@@ -54,11 +54,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 											update: {
 												where: { id: walletBalanceId },
 												data: {
-													amount: { decrement: funds.amount }
-												}
-											}
+													amount: { decrement: funds.amount },
+												},
+											},
 									  }
-									: undefined
+									: undefined,
 							},
 							select: {
 								gold: true,
@@ -66,11 +66,11 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 									? {
 											where: { id: walletBalanceId },
 											select: {
-												amount: true
-											}
+												amount: true,
+											},
 									  }
-									: undefined
-							}
+									: undefined,
+							},
 						})
 
 						if (!sender) throw new Error('User Not Found')
@@ -83,9 +83,9 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 						const compFunds = await prisma.fundsBalance.findFirst({
 							where: {
 								compId,
-								currency: { code: funds?.currency }
+								currency: { code: funds?.currency },
 							},
-							select: { id: true }
+							select: { id: true, currency: { select: { id: true } } },
 						})
 
 						// Add Funds to Company
@@ -99,19 +99,20 @@ export default async (req: NextApiRequest, res: NextApiResponse) => {
 												create: {
 													currency: {
 														connect: {
-															code: funds.currency
-														}
+															id: compFunds?.currency.id,
+															code: funds.currency,
+														},
 													},
-													amount: funds.amount
+													amount: funds.amount,
 												},
 												update: {
-													amount: { increment: funds.amount }
+													amount: { increment: funds.amount },
 												},
-												where: { id: compFunds?.id ?? '' }
-											}
+												where: { id: compFunds?.id ?? -1 },
+											},
 									  }
-									: undefined
-							}
+									: undefined,
+							},
 						})
 
 						if (!recipient) throw new Error('Something Went Wrong')
