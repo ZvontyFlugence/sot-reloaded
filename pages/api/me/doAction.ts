@@ -11,7 +11,7 @@ import {
 	buildSuperSoldierAlert,
 } from '@/core/apiHelpers/alertBuilder'
 import { Decimal } from '@prisma/client/runtime'
-import { calculateProductivity } from '@/core/apiHelpers/productivityHelper'
+import { calculateProductivity, getConsumedMaterials } from '@/core/apiHelpers/productivityHelper'
 import convertDecimal from '@/core/uiHelpers/convertDecimal'
 
 export default async (req: NextApiRequest, res: NextApiResponse) => {
@@ -702,11 +702,16 @@ async function work(userId: number) {
 
 				if (!compInfo) throw new Error('Could Not Find Company Info')
 
+				// Figure out consumed materials type and amount
+				let [material, amount] = getConsumedMaterials(compInfo.type)
+
 				// Calculate Amount of Product to Generate
 				let produced = calculateProductivity(compInfo.type)
 
-				// Check if Company Already Has Product In Inventory
-				// let itemId = (compInfo?.quality ?? 0) === 0 ? compInfo.type : compInfo.type + compInfo.quality - 1
+				// Check if Company Already Has Product and Material In Inventory
+				let matId = compInfo.inventory.find((i) => i.itemId === material)?.id ?? -1
+				if (material !== -1 && matId === -1) throw new Error('Insufficient Raw Materials')
+
 				let stockId = compInfo.inventory.find((i) => i.itemId === compInfo?.type)?.id ?? -1
 
 				// Subtract Wage from Company and Add Produced Product
@@ -730,9 +735,35 @@ async function work(userId: number) {
 								},
 								where: { id: stockId },
 							},
+							update:
+								material !== -1
+									? {
+											where: { id: matId },
+											data: {
+												quantity: { decrement: amount },
+											},
+									  }
+									: undefined,
 						},
 					},
 				})
+
+				// Make sure material quantity didn't go negative if mats needed
+				if (material !== -1) {
+					let matItem = await prisma.storageItem.findFirst({
+						where: { id: matId },
+						select: {
+							quantity: true,
+						},
+					})
+
+					if (!matItem || matItem.quantity < 0) {
+						throw new Error('Insufficient Raw Materials')
+					} else if (matItem.quantity === 0) {
+						// Delete material with 0 quantity
+						await prisma.storageItem.delete({ where: { id: matId } })
+					}
+				}
 
 				// Check if there is existing User Balance for currency
 				let userWallet = await prisma.walletBalance.findFirst({

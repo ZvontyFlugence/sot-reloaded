@@ -5,18 +5,35 @@ import { ITEMS } from '@/core/constants'
 import { useUser } from '@/core/context/UserContext'
 import withPrisma from '@/core/prismaClient'
 import request from '@/core/request'
-import { Avatar, Button, Table, Tbody, Td, Th, Thead, Tr, useToast } from '@chakra-ui/react'
-import { Country, Currency, Prisma, PrismaClient, ProductOffer } from '@prisma/client'
+import {
+	Avatar,
+	Button,
+	Input,
+	InputGroup,
+	InputRightElement,
+	Table,
+	Tbody,
+	Td,
+	Th,
+	Thead,
+	Tr,
+	useToast,
+} from '@chakra-ui/react'
+import { Country, Currency, Prisma, PrismaClient, ProductOffer, WalletBalance } from '@prisma/client'
 import { GetServerSideProps, NextPage } from 'next'
 import { getSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
-import useSWR from 'swr'
+import useSWR, { useSWRConfig } from 'swr'
 import { useColorModeValue } from '@chakra-ui/system'
+import convertDecimal from '@/core/uiHelpers/convertDecimal'
+import showToast from '@/core/uiHelpers/showToast'
+import refreshData from '@/core/uiHelpers/refreshData'
 
 interface GoodsMarketProps {
 	defaultCountryId: number
 	countries: (Country & { currency: Currency })[]
+	userWallet: WalletBalance[]
 }
 
 type ProductOfferExtended = ProductOffer & {
@@ -30,10 +47,11 @@ type ProductOfferExtended = ProductOffer & {
 
 const getCountryGoodsOffersFetcher = (url: string) => request({ url, method: 'GET' })
 
-const GoodsMarket: NextPage<GoodsMarketProps> = ({ countries, defaultCountryId }) => {
+const GoodsMarket: NextPage<GoodsMarketProps> = ({ countries, defaultCountryId, userWallet }) => {
 	const router = useRouter()
 	const toast = useToast()
 	const user = useUser()
+	const { mutate } = useSWRConfig()
 
 	const [country, setCountry] = useState<number>(defaultCountryId)
 	const [productOffers, setProductOffers] = useState<ProductOfferExtended[]>([])
@@ -65,12 +83,31 @@ const GoodsMarket: NextPage<GoodsMarketProps> = ({ countries, defaultCountryId }
 			)
 	}, [itemFilter, qualityFilter])
 
-	const canPurchase = (priceString: Prisma.Decimal) => {
-		let price = Number.parseFloat(priceString.toString())
-		return true
+	const canPurchase = (priceDecimal: Prisma.Decimal) => {
+		let price = convertDecimal(priceDecimal)
+		let currencyId = countries.find((c) => c.id === country)?.currency.id ?? -1
+		if (currencyId === -1) return false
+
+		let userBalance = convertDecimal(userWallet.find((balance) => balance.currencyId === currencyId)?.amount)
+		return userBalance >= price * quantity
 	}
 
-	const purchaseProduct = (offerId: number) => {}
+	const purchaseProduct = (offerId: number) => {
+		request({
+			url: '/api/markets/goods/purchase',
+			method: 'POST',
+			body: { offerId, quantity },
+		}).then((data) => {
+			if (data.success) {
+				showToast(toast, 'success', 'Item Purchased', data?.message)
+				mutate(`/api/markets/goods?country_id=${country}`)
+				mutate('/api/me/wallet-info')
+				refreshData(router)
+			} else {
+				showToast(toast, 'error', 'Purchase Item Failed', data?.error)
+			}
+		})
+	}
 
 	return user ? (
 		<Layout>
@@ -137,64 +174,75 @@ const GoodsMarket: NextPage<GoodsMarketProps> = ({ countries, defaultCountryId }
 				</div>
 				<div className={`mt-4 ${useColorModeValue('bg-snow-300', 'bg-night-400')} rounded-md shadow-md`}>
 					{productOffers.length === 0 ? (
-						<p className='p-4'>Counry has no product offers</p>
+						<p className='p-4'>Country has no product offers</p>
 					) : (
-						<>
-							{/* TODO: Product Type and Quality Filters */}
-							<Table
-								variant='unstyled'
-								bgColor={useColorModeValue('snow.300', 'night.400')}
-								color={useColorModeValue('night.300', 'snow.100')}
-							>
-								<Thead>
-									<Tr>
-										<Th color={useColorModeValue('night.300', 'snow.100')}>Company</Th>
-										<Th color={useColorModeValue('night.300', 'snow.100')}>Product</Th>
-										<Th color={useColorModeValue('night.300', 'snow.100')}>Price Per Unit</Th>
-										<Th color={useColorModeValue('night.300', 'snow.100')}>Action</Th>
-									</Tr>
-								</Thead>
-								<Tbody>
-									{productOffers.map((offer: ProductOfferExtended, i: number) => (
-										<Tr key={i}>
-											<Td>
-												<div
-													className='flex items-center gap-2 link'
-													onClick={() => router.push(`/company/${offer.compId}`)}
-												>
-													<Avatar src={offer.comp.image} name={offer.comp.name} />
-													{offer.comp.name}
-												</div>
-											</Td>
-											<Td>
-												<InventoryItem
-													item={{ id: offer.id, itemId: offer.itemId, quantity: offer.quantity }}
-													index={0}
-													displayOnly
+						<Table
+							variant='unstyled'
+							bgColor={useColorModeValue('snow.300', 'night.400')}
+							color={useColorModeValue('night.300', 'snow.100')}
+						>
+							<Thead>
+								<Tr>
+									<Th color={useColorModeValue('night.300', 'snow.100')}>Company</Th>
+									<Th color={useColorModeValue('night.300', 'snow.100')}>Product</Th>
+									<Th color={useColorModeValue('night.300', 'snow.100')}>Price</Th>
+									<Th color={useColorModeValue('night.300', 'snow.100')}>Action</Th>
+								</Tr>
+							</Thead>
+							<Tbody>
+								{productOffers.map((offer: ProductOfferExtended, i: number) => (
+									<Tr key={i}>
+										<Td>
+											<div
+												className='flex items-center gap-2 link'
+												onClick={() => router.push(`/company/${offer.compId}`)}
+											>
+												<Avatar src={offer.comp.image} name={offer.comp.name} />
+												{offer.comp.name}
+											</div>
+										</Td>
+										<Td>
+											<InventoryItem
+												item={{ id: offer.id, itemId: offer.itemId, quantity: offer.quantity }}
+												index={0}
+												displayOnly
+											/>
+										</Td>
+										<Td>
+											{(convertDecimal(offer.price) * quantity).toFixed(2)}{' '}
+											{countries.find((c) => c.id === country)?.currency.code ?? ''}
+										</Td>
+										<Td>
+											<InputGroup size='sm'>
+												<Input
+													pr='4.5rem'
+													width='fit-content'
+													borderRadius='3xl'
+													type='number'
+													value={quantity}
+													min={1}
+													max={offer.quantity}
+													onChange={(e) => setQuantity(e.target.valueAsNumber)}
 												/>
-											</Td>
-											<Td>
-												{Number.parseFloat(offer.price.toString()).toFixed(2)}{' '}
-												{countries.find((c) => c.id === country)?.currency.code ?? ''}
-											</Td>
-											<Td>
-												<Button
-													variant='solid'
-													size='sm'
-													bgColor={canPurchase(offer.price) ? 'frost.400' : 'aurora.red'}
-													color='snow.100'
-													colorScheme=''
-													isDisabled={!canPurchase(offer.price)}
-													onClick={() => purchaseProduct(offer.id)}
-												>
-													Purchase
-												</Button>
-											</Td>
-										</Tr>
-									))}
-								</Tbody>
-							</Table>
-						</>
+												<InputRightElement width='4.5rem'>
+													<Button
+														variant='solid'
+														size='sm'
+														bgColor={canPurchase(offer.price) ? 'frost.400' : 'aurora.red'}
+														color='snow.100'
+														colorScheme=''
+														isDisabled={!canPurchase(offer.price)}
+														onClick={() => purchaseProduct(offer.id)}
+													>
+														Purchase
+													</Button>
+												</InputRightElement>
+											</InputGroup>
+										</Td>
+									</Tr>
+								))}
+							</Tbody>
+						</Table>
 					)}
 				</div>
 			</div>
@@ -222,6 +270,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 						ownerId: true,
 					},
 				},
+				wallet: true, // Shouldn't change while on market page so safe to fetch once server-side
 			},
 		})
 
@@ -243,6 +292,7 @@ export const getServerSideProps: GetServerSideProps = async (context) => {
 		props: {
 			defaultCountryId: user.location.ownerId,
 			countries: JSON.parse(JSON.stringify(countries)),
+			userWallet: JSON.parse(JSON.stringify(user.wallet)),
 		},
 	}
 }

@@ -25,7 +25,7 @@ const Inventory: React.FC<InventoryProps> = ({ inventory, ...props }) => {
 	return !inventory || inventory.length === 0 ? (
 		<p className='w-full'>There are no items in inventory</p>
 	) : (
-		<div className='grid grid-cols-3 md:grid-cols-8 rounded p-4'>
+		<div className='grid grid-cols-3 md:grid-cols-8 rounded p-4 gap-2'>
 			{inventory.map((item, i) => (
 				<InventoryItem
 					key={item.id}

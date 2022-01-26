@@ -33,11 +33,11 @@ export enum CloudinaryFolder {
 }
 
 export enum CompType {
-	WHEAT,
-	IRON,
-	OIL,
-	URANIUM,
-	ALUMINUM,
-	STEEL,
-	BREAD,
+	WHEAT = 0,
+	IRON = 1,
+	OIL = 2,
+	URANIUM = 3,
+	ALUMINUM = 4,
+	STEEL = 5,
+	BREAD = 6,
 }

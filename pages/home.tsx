@@ -1,3 +1,4 @@
+import Inventory from '@/components/shared/Inventory'
 import { CompanyTypes } from '@/core/constants'
 import { IJobRecord } from '@/core/interfaces'
 import { Avatar } from '@chakra-ui/avatar'
@@ -5,6 +6,7 @@ import { Button } from '@chakra-ui/button'
 import { Grid, GridItem, Heading } from '@chakra-ui/layout'
 import { useColorModeValue } from '@chakra-ui/system'
 import { useToast } from '@chakra-ui/toast'
+import { InvItem } from '@prisma/client'
 import { GetServerSideProps } from 'next'
 import { getSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
@@ -19,6 +21,7 @@ import refreshData from '../core/uiHelpers/refreshData'
 import showToast from '../core/uiHelpers/showToast'
 
 const jobFetcher = (url: string) => request({ url, method: 'GET' })
+const invFetcher = (url: string) => request({ url, method: 'GET' })
 
 const Home: React.FC = () => {
 	const router = useRouter()
@@ -27,8 +30,10 @@ const Home: React.FC = () => {
 
 	const { mutate } = useSWRConfig()
 	const { data: jobData } = useSWR('/api/me/job', jobFetcher)
+	const { data: invData } = useSWR('/api/me/inventory', invFetcher)
 
 	const [job, setJob] = useState<IJobRecord | null>(null)
+	const [inventory, setInventory] = useState<InvItem[]>([])
 
 	const hasTrained = !!user && new Date(user.canTrain) > new Date(Date.now())
 	const hasWorked = !!user && new Date(user.canWork) > new Date(Date.now())
@@ -36,6 +41,10 @@ const Home: React.FC = () => {
 	useEffect(() => {
 		if (jobData?.job.job) setJob(jobData.job.job)
 	}, [jobData])
+
+	useEffect(() => {
+		if (invData?.inventory) setInventory(invData.inventory)
+	}, [invData])
 
 	const handleTrain = () => {
 		if (!hasTrained) {
@@ -167,7 +176,7 @@ const Home: React.FC = () => {
 									Inventory
 								</Card.Header>
 								<Card.Content className={useColorModeValue('text-night-300', 'text-snow-100')}>
-									<div>Inventory Here</div>
+									<Inventory inventory={inventory} displayOnly />
 								</Card.Content>
 							</Card>
 						</GridItem>
